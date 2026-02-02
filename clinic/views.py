@@ -161,7 +161,9 @@ def prescription_create(request, patient_id):
     
     if request.method == 'POST':
         form = PrescriptionForm(request.POST)
-        if form.is_valid():
+        formset = PrescriptionMedicineFormSet(request.POST)
+        
+        if form.is_valid() and formset.is_valid():
             prescription = form.save(commit=False)
             prescription.patient = patient
             
@@ -172,9 +174,10 @@ def prescription_create(request, patient_id):
             prescription.save()
             form.save_m2m()  # Save many-to-many relationships (tests_ordered)
             
-            # Handle medicine formset
-            formset = PrescriptionMedicineFormSet(request.POST, instance=prescription)
-            if formset.is_valid():
+            # Link the formset to the prescription and process medicines
+            formset.instance = prescription
+            
+            try:
                 # Auto-save custom medicines to database for future use
                 for medicine_form in formset:
                     if medicine_form.cleaned_data and not medicine_form.cleaned_data.get('DELETE', False):
@@ -199,9 +202,16 @@ def prescription_create(request, patient_id):
                             medicine_form.instance.custom_medicine = ''  # Clear custom field since we linked it
                 
                 formset.save()
-            
-            messages.success(request, 'Prescription created successfully.')
-            return redirect('prescription_detail', pk=prescription.pk)
+                
+                messages.success(request, 'Prescription created successfully.')
+                return redirect('prescription_detail', pk=prescription.pk)
+            except Exception as e:
+                messages.error(request, f'Error saving medicines: {str(e)}')
+                # Delete the prescription if medicine saving failed
+                prescription.delete()
+        else:
+            # Form or formset has errors - don't save anything
+            formset = PrescriptionMedicineFormSet(request.POST)
     else:
         # Set default date to today
         from django.utils import timezone
