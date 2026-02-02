@@ -408,11 +408,13 @@
         <!-- Footer -->
         <div class="footer">
             <div class="follow-up">
-                <strong>Follow up:</strong> {{ prescription.follow_up|default:"_________________" }}
-            </div>
-            <div class="disclaimer" style="text-align: right; max-width: 60%; font-size: 8pt; color: #555;">
                 <strong>Note:</strong> This Prescription is advised on the basis of current symptoms. Disease pattern
                 may change in hours by nature, In case of emergency, Visit nearby
+            </div>
+            <div class="disclaimer" style="text-align: right; max-width: 60%; font-size: 8pt; color: #555;">
+                <strong>Follow up:</strong> {{ prescription.follow_up|default:"_________________" }}
+
+
             </div>
         </div>
     </div>
