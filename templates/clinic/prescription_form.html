@@ -147,7 +147,12 @@
                 <section class="form-section">
                     <h3><i class="fas fa-clipboard-list"></i> Instructions & Follow-up</h3>
                     <div class="form-group">
-                        <label for="id_special_instructions">Special Instructions</label>
+                        <label for="id_special_instructions">
+                            Special Instructions
+                            <button type="button" id="voiceBtnSpecial" class="btn-voice" title="Click to speak">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </label>
                         {{ form.special_instructions }}
                     </div>
                     <div class="form-group">
@@ -230,48 +235,54 @@
         totalForms.value = formIndex;
     }
     // Voice to Text Feature
-    const voiceBtn = document.getElementById('voiceBtn');
-    const clinicalRecordInput = document.getElementById('id_clinical_record');
-    let recognition = null;
+    function setupVoiceInput(btnId, inputId) {
+        if (!('webkitSpeechRecognition' in window)) {
+            const btn = document.getElementById(btnId);
+            if (btn) btn.style.display = 'none';
+            return;
+        }
 
-    if ('webkitSpeechRecognition' in window) {
-        recognition = new webkitSpeechRecognition();
+        const btn = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+
+        if (!btn || !input) return;
+
+        const recognition = new webkitSpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = 'en-US'; // Default to English, can be changed
+        recognition.lang = 'en-US';
 
         recognition.onstart = function () {
-            voiceBtn.classList.add('recording');
-            voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            btn.classList.add('recording');
+            btn.innerHTML = '<i class="fas fa-stop"></i>';
         };
 
         recognition.onend = function () {
-            voiceBtn.classList.remove('recording');
-            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            btn.classList.remove('recording');
+            btn.innerHTML = '<i class="fas fa-microphone"></i>';
         };
 
         recognition.onresult = function (event) {
             const transcript = event.results[0][0].transcript;
-
-            // Append with space if field not empty
-            if (clinicalRecordInput.value.trim() !== "") {
-                clinicalRecordInput.value += " " + transcript;
+            if (input.value.trim() !== "") {
+                input.value += " " + transcript;
             } else {
-                clinicalRecordInput.value = transcript;
+                input.value = transcript;
             }
         };
 
-        voiceBtn.addEventListener('click', function () {
-            if (voiceBtn.classList.contains('recording')) {
+        btn.addEventListener('click', function () {
+            if (btn.classList.contains('recording')) {
                 recognition.stop();
             } else {
                 recognition.start();
             }
         });
-    } else {
-        voiceBtn.style.display = 'none'; // Hide if not supported
-        console.warn("Web Speech API not supported in this browser.");
     }
+
+    // Initialize Voice Features
+    setupVoiceInput('voiceBtn', 'id_clinical_record');
+    setupVoiceInput('voiceBtnSpecial', 'id_special_instructions');
 </script>
 <style>
     .btn-voice {
