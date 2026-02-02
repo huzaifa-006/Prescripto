@@ -38,6 +38,12 @@ class PrescriptionForm(forms.ModelForm):
             'is_first_visit', 'pulse', 'spo2', 'chest_notes', 'tests_ordered',
             'special_instructions', 'follow_up'
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make all fields optional
+        for field in self.fields:
+            self.fields[field].required = False
         widgets = {
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'clinical_record': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Clinical notes and diagnosis'}),

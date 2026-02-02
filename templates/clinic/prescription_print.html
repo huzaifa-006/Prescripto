@@ -222,17 +222,7 @@
             font-size: 10pt;
         }
 
-        .signature-area {
-            text-align: right;
-        }
 
-        .signature-line {
-            width: 50mm;
-            border-top: 1px solid #000;
-            margin-top: 10mm;
-            padding-top: 1mm;
-            font-size: 9pt;
-        }
 
         /* Print Styles */
         @media print {
@@ -402,11 +392,7 @@
             <div class="follow-up">
                 <strong>Follow up:</strong> {{ prescription.follow_up|default:"_________________" }}
             </div>
-            <div class="signature-area">
-                <div class="signature-line">
-                    Doctor's Signature
-                </div>
-            </div>
+
         </div>
     </div>
 </body>
