@@ -40,7 +40,12 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="id_clinical_record">Clinical Record / Diagnosis</label>
+                        <label for="id_clinical_record">
+                            Clinical Record / Diagnosis
+                            <button type="button" id="voiceBtn" class="btn-voice" title="Click to speak">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </label>
                         {{ form.clinical_record }}
                     </div>
 
@@ -224,5 +229,82 @@
         formIndex++;
         totalForms.value = formIndex;
     }
+    // Voice to Text Feature
+    const voiceBtn = document.getElementById('voiceBtn');
+    const clinicalRecordInput = document.getElementById('id_clinical_record');
+    let recognition = null;
+
+    if ('webkitSpeechRecognition' in window) {
+        recognition = new webkitSpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US'; // Default to English, can be changed
+
+        recognition.onstart = function () {
+            voiceBtn.classList.add('recording');
+            voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+        };
+
+        recognition.onend = function () {
+            voiceBtn.classList.remove('recording');
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        };
+
+        recognition.onresult = function (event) {
+            const transcript = event.results[0][0].transcript;
+
+            // Append with space if field not empty
+            if (clinicalRecordInput.value.trim() !== "") {
+                clinicalRecordInput.value += " " + transcript;
+            } else {
+                clinicalRecordInput.value = transcript;
+            }
+        };
+
+        voiceBtn.addEventListener('click', function () {
+            if (voiceBtn.classList.contains('recording')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+    } else {
+        voiceBtn.style.display = 'none'; // Hide if not supported
+        console.warn("Web Speech API not supported in this browser.");
+    }
 </script>
+<style>
+    .btn-voice {
+        background: none;
+        border: none;
+        color: #666;
+        cursor: pointer;
+        margin-left: 10px;
+        font-size: 1.1em;
+        transition: color 0.3s;
+    }
+
+    .btn-voice:hover {
+        color: #3498db;
+    }
+
+    .btn-voice.recording {
+        color: #e74c3c;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
 {% endblock %}
