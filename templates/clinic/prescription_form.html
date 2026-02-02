@@ -167,6 +167,19 @@
 
 {% block extra_js %}
 <script>
+    // Initialize Select2 on medicine dropdowns
+    $(document).ready(function () {
+        initializeSelect2();
+    });
+
+    function initializeSelect2() {
+        $('.medicine-select').select2({
+            placeholder: 'Search medicine...',
+            allowClear: true,
+            width: '100%'
+        });
+    }
+
     // Get initial form count from the management form
     let formIndex = parseInt(document.getElementById('id_medicines-TOTAL_FORMS').value) || 0;
 
@@ -181,6 +194,9 @@
         // Clone the structure from an existing row
         const existingRow = container.querySelector('.medicine-row');
         if (existingRow) {
+            // Destroy Select2 before cloning
+            $(existingRow).find('.medicine-select').select2('destroy');
+
             newRow.innerHTML = existingRow.innerHTML.replace(/-\d+-/g, `-${formIndex}-`);
 
             // Clear values in the new row
@@ -199,9 +215,12 @@
             if (idField) {
                 idField.value = '';
             }
+
+            // Reinitialize Select2 on all rows
+            container.appendChild(newRow);
+            initializeSelect2();
         }
 
-        container.appendChild(newRow);
         formIndex++;
         totalForms.value = formIndex;
     }

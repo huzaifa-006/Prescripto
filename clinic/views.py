@@ -175,6 +175,29 @@ def prescription_create(request, patient_id):
             # Handle medicine formset
             formset = PrescriptionMedicineFormSet(request.POST, instance=prescription)
             if formset.is_valid():
+                # Auto-save custom medicines to database for future use
+                for medicine_form in formset:
+                    if medicine_form.cleaned_data and not medicine_form.cleaned_data.get('DELETE', False):
+                        custom_med_name = medicine_form.cleaned_data.get('custom_medicine', '').strip()
+                        selected_medicine = medicine_form.cleaned_data.get('medicine')
+                        
+                        # If custom medicine is provided and no dropdown selection
+                        if custom_med_name and not selected_medicine:
+                            # Try to find existing medicine with this name
+                            existing_med = Medicine.objects.filter(name__iexact=custom_med_name).first()
+                            
+                            if not existing_med:
+                                # Create new medicine in database
+                                existing_med = Medicine.objects.create(
+                                    name=custom_med_name,
+                                    form='Tab',  # Default form
+                                    is_active=True
+                                )
+                            
+                            # Update the form instance to link to this medicine
+                            medicine_form.instance.medicine = existing_med
+                            medicine_form.instance.custom_medicine = ''  # Clear custom field since we linked it
+                
                 formset.save()
             
             messages.success(request, 'Prescription created successfully.')

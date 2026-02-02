@@ -1530,3 +1530,46 @@ textarea.form-control {
 .col-medicine .form-control {
     font-size: 0.9rem;
 }
+
+/* ============================================
+   SELECT2 CUSTOMIZATION
+   ============================================ */
+.select2-container--default .select2-selection--single {
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 5px 10px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 28px;
+    color: var(--text-primary);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px;
+}
+
+.select2-dropdown {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: var(--primary-color);
+}
+
+.select2-container--default .select2-results__option--selected {
+    background-color: var(--light-bg);
+}
+
+.select2-results__option {
+    padding: 8px 12px;
+}
