@@ -1509,3 +1509,24 @@ textarea.form-control {
     font-weight: 600;
     font-size: 0.9rem;
 }
+
+/* ============================================
+   CUSTOM MEDICINE INPUT
+   ============================================ */
+.col-medicine {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.or-label {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.col-medicine .form-control {
+    font-size: 0.9rem;
+}

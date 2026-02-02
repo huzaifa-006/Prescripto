@@ -138,7 +138,10 @@ class Prescription(models.Model):
 class PrescriptionMedicine(models.Model):
     """Medicines prescribed in a prescription with dosage details"""
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='medicines')
-    medicine = models.ForeignKey(Medicine, on_delete=models.PROTECT)
+    medicine = models.ForeignKey(Medicine, on_delete=models.PROTECT, null=True, blank=True)
+    
+    # Custom medicine name (if not selecting from dropdown)
+    custom_medicine = models.CharField(max_length=200, blank=True, help_text="Type medicine name if not in list")
     
     # Dosage
     dosage = models.CharField(max_length=100, blank=True, help_text="e.g., 500mg")
@@ -155,8 +158,15 @@ class PrescriptionMedicine(models.Model):
     # Additional instructions
     instructions = models.CharField(max_length=200, blank=True, help_text="Before/after food, etc.")
     
+    def get_medicine_name(self):
+        """Returns medicine name (from dropdown or custom text)"""
+        if self.medicine:
+            return str(self.medicine)
+        return self.custom_medicine or "Unknown"
+    
     def __str__(self):
-        return f"{self.medicine} for {self.prescription.patient.name}"
+        return f"{self.get_medicine_name()} for {self.prescription.patient.name}"
     
     class Meta:
         ordering = ['id']
+

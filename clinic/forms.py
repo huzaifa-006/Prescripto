@@ -6,14 +6,12 @@ class PatientForm(forms.ModelForm):
     """Form for creating/editing patients"""
     class Meta:
         model = Patient
-        fields = ['name', 'gender', 'age', 'weight', 'phone', 'address']
+        fields = ['name', 'gender', 'age', 'weight']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Patient Name'}),
             'gender': forms.Select(attrs={'class': 'form-control'}),
             'age': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Age'}),
             'weight': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Weight (kg)', 'step': '0.1'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone Number'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Address'}),
         }
 
 
@@ -62,9 +60,10 @@ class PrescriptionMedicineForm(forms.ModelForm):
     """Form for adding medicines to a prescription"""
     class Meta:
         model = PrescriptionMedicine
-        fields = ['medicine', 'dosage', 'morning', 'afternoon', 'evening', 'night', 'days', 'instructions']
+        fields = ['medicine', 'custom_medicine', 'dosage', 'morning', 'afternoon', 'evening', 'night', 'days', 'instructions']
         widgets = {
             'medicine': forms.Select(attrs={'class': 'form-control medicine-select'}),
+            'custom_medicine': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Or type medicine name here'}),
             'dosage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dosage'}),
             'morning': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'afternoon': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
