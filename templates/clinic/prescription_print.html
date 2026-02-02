@@ -283,6 +283,11 @@
                     Sleep, Obesity & Smoking Related Breathing Disorders
                 </div>
             </div>
+
+            <div style="flex: 0 0 auto; margin: 0 5mm; display: flex; align-items: center;">
+                <img src="/static/images/logo.jpg" alt="Logo" style="height: 25mm; width: auto;">
+            </div>
+
             <div class="hospital-info">
                 <div class="hospital-name">Rahim Hospital</div>
                 <div class="hospital-tagline">Because Your Health Matters</div>
@@ -291,7 +296,8 @@
 
         <!-- Patient Info -->
         <div class="patient-info-row">
-            <span><span class="field-label">Pt's Name:</span> <span class="patient-name">{{ prescription.patient.name }}</span></span>
+            <span><span class="field-label">Pt's Name:</span> <span class="patient-name">{{ prescription.patient.name
+                    }}</span></span>
             <span><span class="field-label">Gender:</span> {{ prescription.patient.get_gender_display }}</span>
             <span><span class="field-label">Age:</span> {{ prescription.patient.age|default:"" }}</span>
             <span><span class="field-label">Weight:</span> {{ prescription.patient.weight|default:"" }}</span>
@@ -299,7 +305,8 @@
         </div>
 
         <div class="patient-info-row">
-            <span><span class="field-label">Patient ID:</span> <strong>{{ prescription.patient.patient_id }}</strong></span>
+            <span><span class="field-label">Patient ID:</span> <strong>{{ prescription.patient.patient_id
+                    }}</strong></span>
             <span>
                 {% if prescription.dm %}DM{% endif %}
                 {% if prescription.htn %}/ HTN{% endif %}
@@ -359,10 +366,14 @@
                         {% for med in prescription.medicines.all %}
                         <tr>
                             <td>{{ med.get_medicine_name }}{% if med.dosage %} - {{ med.dosage }}{% endif %}</td>
-                            <td class="timing-cell">{% if med.morning %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td class="timing-cell">{% if med.afternoon %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td class="timing-cell">{% if med.evening %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td class="timing-cell">{% if med.night %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.morning %}<span class="check">✓</span>{% else %}-{% endif
+                                %}</td>
+                            <td class="timing-cell">{% if med.afternoon %}<span class="check">✓</span>{% else %}-{%
+                                endif %}</td>
+                            <td class="timing-cell">{% if med.evening %}<span class="check">✓</span>{% else %}-{% endif
+                                %}</td>
+                            <td class="timing-cell">{% if med.night %}<span class="check">✓</span>{% else %}-{% endif %}
+                            </td>
                             <td>{{ med.days }}</td>
                         </tr>
                         {% endfor %}
@@ -395,11 +406,6 @@
         <div class="footer">
             <div class="follow-up">
                 <strong>Follow up:</strong> {{ prescription.follow_up|default:"_________________" }}
-            </div>
-            <div class="signature-area">
-                <div class="signature-line">
-                    Doctor's Signature
-                </div>
             </div>
         </div>
     </div>
