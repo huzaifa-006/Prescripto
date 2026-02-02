@@ -291,8 +291,7 @@
 
         <!-- Patient Info -->
         <div class="patient-info-row">
-            <span><span class="field-label">Pt's Name:</span> <span class="patient-name">{{ prescription.patient.name
-                    }}</span></span>
+            <span><span class="field-label">Pt's Name:</span> <span class="patient-name">{{ prescription.patient.name }}</span></span>
             <span><span class="field-label">Gender:</span> {{ prescription.patient.get_gender_display }}</span>
             <span><span class="field-label">Age:</span> {{ prescription.patient.age|default:"" }}</span>
             <span><span class="field-label">Weight:</span> {{ prescription.patient.weight|default:"" }}</span>
@@ -300,8 +299,7 @@
         </div>
 
         <div class="patient-info-row">
-            <span><span class="field-label">Patient ID:</span> <strong>{{ prescription.patient.patient_id
-                    }}</strong></span>
+            <span><span class="field-label">Patient ID:</span> <strong>{{ prescription.patient.patient_id }}</strong></span>
             <span>
                 {% if prescription.dm %}DM{% endif %}
                 {% if prescription.htn %}/ HTN{% endif %}
