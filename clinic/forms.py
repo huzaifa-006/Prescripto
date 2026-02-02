@@ -73,6 +73,12 @@ class PrescriptionMedicineForm(forms.ModelForm):
             'instructions': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Instructions'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make all fields optional
+        for field in self.fields:
+            self.fields[field].required = False
+
 
 # Formset for multiple medicines in a prescription
 PrescriptionMedicineFormSet = forms.inlineformset_factory(

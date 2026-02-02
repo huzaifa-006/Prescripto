@@ -361,14 +361,10 @@
                         {% for med in prescription.medicines.all %}
                         <tr>
                             <td>{{ med.get_medicine_name }}{% if med.dosage %} - {{ med.dosage }}{% endif %}</td>
-                            <td class="timing-cell">{% if med.morning %}<span class="check">✓</span>{% else %}-{% endif
-                                %}</td>
-                            <td class="timing-cell">{% if med.afternoon %}<span class="check">✓</span>{% else %}-{%
-                                endif %}</td>
-                            <td class="timing-cell">{% if med.evening %}<span class="check">✓</span>{% else %}-{% endif
-                                %}</td>
-                            <td class="timing-cell">{% if med.night %}<span class="check">✓</span>{% else %}-{% endif %}
-                            </td>
+                            <td class="timing-cell">{% if med.morning %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.afternoon %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.evening %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.night %}<span class="check">✓</span>{% else %}-{% endif %}</td>
                             <td>{{ med.days }}</td>
                         </tr>
                         {% endfor %}
