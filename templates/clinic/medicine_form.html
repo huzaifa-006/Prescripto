@@ -1,0 +1,60 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}{{ title }} - Prescripto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page">
+        <div class="form-header">
+            <h1><i class="fas fa-pills"></i> {{ title }}</h1>
+        </div>
+
+        <div class="form-card">
+            <form method="post" class="medicine-form">
+                {% csrf_token %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_name">Medicine Name *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <span class="error">{{ form.name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_form">Form *</label>
+                        {{ form.form }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_strength">Strength</label>
+                        {{ form.strength }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_default_dosage">Default Dosage</label>
+                        {{ form.default_dosage }}
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.is_active }}
+                            <span>Active (available for prescriptions)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'medicine_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Medicine
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

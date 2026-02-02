@@ -1,0 +1,72 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Medicines - Prescripto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="medicine-page">
+        <div class="page-header">
+            <h1><i class="fas fa-pills"></i> Medicines Database</h1>
+            <a href="{% url 'medicine_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Medicine
+            </a>
+        </div>
+
+        <div class="search-box-container compact">
+            <form method="get" class="search-form">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" value="{{ query }}" placeholder="Search medicines..."
+                        class="search-input">
+                </div>
+                <button type="submit" class="btn btn-secondary">Search</button>
+            </form>
+        </div>
+
+        {% if medicines %}
+        <div class="medicine-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Medicine Name</th>
+                        <th>Form</th>
+                        <th>Strength</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in medicines %}
+                    <tr>
+                        <td class="medicine-name">{{ medicine.name }}</td>
+                        <td>{{ medicine.get_form_display }}</td>
+                        <td>{{ medicine.strength|default:"-" }}</td>
+                        <td>
+                            {% if medicine.is_active %}
+                            <span class="badge badge-success">Active</span>
+                            {% else %}
+                            <span class="badge badge-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'medicine_edit' medicine.pk %}" class="btn btn-sm btn-outline">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-capsules"></i>
+            <p>No medicines in database</p>
+            <a href="{% url 'medicine_create' %}" class="btn btn-primary">
+                Add First Medicine
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

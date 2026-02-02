@@ -1,0 +1,186 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Prescription - {{ prescription.patient.name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="prescription-detail-page">
+        <!-- Header Actions -->
+        <div class="detail-header">
+            <div class="header-info">
+                <h1><i class="fas fa-file-prescription"></i> Prescription Details</h1>
+                <span class="prescription-date">{{ prescription.date|date:"d F Y" }}</span>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'prescription_edit' prescription.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{% url 'prescription_print' prescription.pk %}" class="btn btn-primary" target="_blank">
+                    <i class="fas fa-print"></i> Print
+                </a>
+            </div>
+        </div>
+        
+        <!-- Patient Info -->
+        <div class="prescription-patient-card">
+            <h3><i class="fas fa-user"></i> Patient Information</h3>
+            <div class="patient-info-grid">
+                <div class="info-item">
+                    <span class="label">Patient ID</span>
+                    <span class="value">{{ prescription.patient.patient_id }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Name</span>
+                    <span class="value">{{ prescription.patient.name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Gender</span>
+                    <span class="value">{{ prescription.patient.get_gender_display }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Age</span>
+                    <span class="value">{{ prescription.patient.age|default:"N/A" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Weight</span>
+                    <span class="value">{{ prescription.patient.weight|default:"N/A" }} kg</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Visit Type</span>
+                    <span class="value">
+                        {% if prescription.is_first_visit %}
+                        <span class="badge badge-info">First Visit</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Follow-up</span>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Clinical Record -->
+        <div class="prescription-section">
+            <h3><i class="fas fa-notes-medical"></i> Clinical Record</h3>
+            <div class="clinical-content">
+                {% if prescription.clinical_record %}
+                <p>{{ prescription.clinical_record|linebreaks }}</p>
+                {% else %}
+                <p class="empty-text">No clinical notes recorded</p>
+                {% endif %}
+            </div>
+            
+            {% if prescription.dm or prescription.htn or prescription.ihd or prescription.tb or prescription.smoking %}
+            <div class="medical-history-tags">
+                {% if prescription.dm %}<span class="tag">DM</span>{% endif %}
+                {% if prescription.htn %}<span class="tag">HTN</span>{% endif %}
+                {% if prescription.ihd %}<span class="tag">IHD</span>{% endif %}
+                {% if prescription.tb %}<span class="tag">TB</span>{% endif %}
+                {% if prescription.smoking %}<span class="tag">Smoking</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Vitals -->
+        {% if prescription.pulse or prescription.spo2 or prescription.chest_notes %}
+        <div class="prescription-section">
+            <h3><i class="fas fa-heartbeat"></i> Vitals</h3>
+            <div class="vitals-grid">
+                {% if prescription.pulse %}
+                <div class="vital-item">
+                    <span class="vital-label">Pulse</span>
+                    <span class="vital-value">{{ prescription.pulse }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.spo2 %}
+                <div class="vital-item">
+                    <span class="vital-label">SPO2</span>
+                    <span class="vital-value">{{ prescription.spo2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% if prescription.chest_notes %}
+            <p class="chest-notes"><strong>Chest:</strong> {{ prescription.chest_notes }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Medicines -->
+        <div class="prescription-section">
+            <h3><i class="fas fa-prescription"></i> Rx - Medicines</h3>
+            {% if prescription.medicines.exists %}
+            <table class="medicines-detail-table">
+                <thead>
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Dosage</th>
+                        <th class="timing-header">
+                            <span>M</span>
+                            <span>A</span>
+                            <span>E</span>
+                            <span>N</span>
+                        </th>
+                        <th>Days</th>
+                        <th>Instructions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for med in prescription.medicines.all %}
+                    <tr>
+                        <td class="medicine-name">{{ med.medicine }}</td>
+                        <td>{{ med.dosage|default:"-" }}</td>
+                        <td class="timing-cells">
+                            <span class="{% if med.morning %}checked{% endif %}">{% if med.morning %}✓{% else %}-{% endif %}</span>
+                            <span class="{% if med.afternoon %}checked{% endif %}">{% if med.afternoon %}✓{% else %}-{% endif %}</span>
+                            <span class="{% if med.evening %}checked{% endif %}">{% if med.evening %}✓{% else %}-{% endif %}</span>
+                            <span class="{% if med.night %}checked{% endif %}">{% if med.night %}✓{% else %}-{% endif %}</span>
+                        </td>
+                        <td>{{ med.days }} day(s)</td>
+                        <td>{{ med.instructions|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="empty-text">No medicines prescribed</p>
+            {% endif %}
+        </div>
+        
+        <!-- Lab Tests -->
+        {% if prescription.tests_ordered.exists %}
+        <div class="prescription-section">
+            <h3><i class="fas fa-flask"></i> Lab Tests Ordered</h3>
+            <div class="tests-list">
+                {% for test in prescription.tests_ordered.all %}
+                <span class="test-badge">{{ test }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Instructions -->
+        {% if prescription.special_instructions %}
+        <div class="prescription-section">
+            <h3><i class="fas fa-clipboard-list"></i> Special Instructions</h3>
+            <div class="instructions-content">
+                {{ prescription.special_instructions|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Follow-up -->
+        {% if prescription.follow_up %}
+        <div class="prescription-section">
+            <h3><i class="fas fa-calendar-check"></i> Follow-up</h3>
+            <p>{{ prescription.follow_up }}</p>
+        </div>
+        {% endif %}
+        
+        <!-- Navigation -->
+        <div class="detail-navigation">
+            <a href="{% url 'patient_detail' prescription.patient.pk %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Patient
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

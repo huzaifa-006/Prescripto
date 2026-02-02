@@ -1,0 +1,48 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}All Patients - Prescripto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="patients-page">
+        <div class="page-header">
+            <h1><i class="fas fa-users"></i> All Patients</h1>
+            <a href="{% url 'patient_create' %}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Add Patient
+            </a>
+        </div>
+
+        {% if patients %}
+        <div class="patients-grid">
+            {% for patient in patients %}
+            <div class="patient-card">
+                <div class="patient-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="patient-info">
+                    <h3>{{ patient.name }}</h3>
+                    <p class="patient-id">{{ patient.patient_id }}</p>
+                    <p class="patient-meta">
+                        {{ patient.get_gender_display }} | {{ patient.age|default:"N/A" }} yrs
+                    </p>
+                </div>
+                <div class="patient-actions">
+                    <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline btn-sm">
+                        View
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>No patients registered yet</p>
+            <a href="{% url 'patient_create' %}" class="btn btn-primary">
+                Register First Patient
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

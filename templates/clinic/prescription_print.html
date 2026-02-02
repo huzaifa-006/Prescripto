@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescription - {{ prescription.patient.name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.4;
+            padding: 10mm;
+            max-width: 210mm;
+            margin: 0 auto;
+        }
+
+        .prescription-slip {
+            border: 2px solid #000;
+            padding: 5mm;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #000;
+            padding-bottom: 3mm;
+            margin-bottom: 3mm;
+        }
+
+        .doctor-info {
+            flex: 1;
+        }
+
+        .doctor-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #1a5f7a;
+        }
+
+        .doctor-title {
+            font-size: 9pt;
+            margin-top: 1mm;
+        }
+
+        .doctor-credentials {
+            font-size: 8pt;
+            color: #555;
+        }
+
+        .hospital-info {
+            text-align: center;
+            flex: 0 0 auto;
+        }
+
+        .hospital-name {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #c0392b;
+        }
+
+        .hospital-tagline {
+            font-size: 8pt;
+            font-style: italic;
+        }
+
+        /* Patient Info */
+        .patient-info-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ccc;
+            padding: 2mm 0;
+            font-size: 11pt;
+        }
+
+        .patient-info-row span {
+            display: inline-block;
+        }
+
+        .patient-name {
+            font-weight: bold;
+        }
+
+        .field-label {
+            color: #666;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            margin-top: 3mm;
+            min-height: 150mm;
+        }
+
+        .left-column {
+            flex: 0 0 30%;
+            border-right: 1px solid #ccc;
+            padding-right: 3mm;
+        }
+
+        .right-column {
+            flex: 0 0 70%;
+            padding-left: 3mm;
+        }
+
+        .section-title {
+            font-size: 10pt;
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 2mm;
+        }
+
+        .clinical-record {
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        /* Rx Section */
+        .rx-header {
+            font-size: 24pt;
+            font-weight: bold;
+            font-family: serif;
+            margin-bottom: 2mm;
+        }
+
+        .medicines-table {
+            width: 100%;
+            font-size: 10pt;
+            border-collapse: collapse;
+        }
+
+        .medicines-table th,
+        .medicines-table td {
+            padding: 1.5mm;
+            text-align: left;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .medicines-table th {
+            font-size: 8pt;
+            color: #666;
+            border-bottom: 1px solid #999;
+        }
+
+        .timing-header,
+        .timing-cell {
+            text-align: center;
+            width: 20px;
+        }
+
+        .timing-cell .check {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Medical History Badges */
+        .medical-history {
+            margin-top: 3mm;
+            font-size: 9pt;
+        }
+
+        .history-badge {
+            display: inline-block;
+            padding: 1mm 2mm;
+            margin: 1mm;
+            border: 1px solid #999;
+            border-radius: 2mm;
+            font-size: 8pt;
+        }
+
+        /* Instructions */
+        .instructions-section {
+            margin-top: 5mm;
+            padding-top: 3mm;
+            border-top: 1px solid #ccc;
+        }
+
+        .instructions-list {
+            font-size: 9pt;
+            padding-left: 5mm;
+        }
+
+        /* Lab Tests */
+        .lab-tests-section {
+            margin-top: 3mm;
+            padding: 2mm;
+            border: 1px solid #ccc;
+        }
+
+        .lab-tests-section h4 {
+            font-size: 9pt;
+            margin-bottom: 2mm;
+        }
+
+        .test-item {
+            font-size: 9pt;
+            display: inline-block;
+            margin-right: 3mm;
+        }
+
+        .test-item input[type="checkbox"] {
+            margin-right: 1mm;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 5mm;
+            padding-top: 3mm;
+            border-top: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .follow-up {
+            font-size: 10pt;
+        }
+
+        .signature-area {
+            text-align: right;
+        }
+
+        .signature-line {
+            width: 50mm;
+            border-top: 1px solid #000;
+            margin-top: 10mm;
+            padding-top: 1mm;
+            font-size: 9pt;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* Print Button */
+        .print-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .print-button:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="print-button no-print" onclick="window.print()">
+        🖨️ Print Prescription
+    </button>
+
+    <div class="prescription-slip">
+        <!-- Header -->
+        <div class="header">
+            <div class="doctor-info">
+                <div class="doctor-name">Dr. M. Mudassir Shafiq</div>
+                <div class="doctor-title">Assistant Professor</div>
+                <div class="doctor-credentials">
+                    M.B.B.S, F.C.P.S (Pulmonology), CHPE, PGC-LSM<br>
+                    Consultant Chest Physician (Bronchoscopist)<br>
+                    Expert in Asthma / Allergy / Chest Issues<br>
+                    Sleep, Obesity & Smoking Related Breathing Disorders
+                </div>
+            </div>
+            <div class="hospital-info">
+                <div class="hospital-name">Rahim Hospital</div>
+                <div class="hospital-tagline">Because Your Health Matters</div>
+            </div>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="patient-info-row">
+            <span><span class="field-label">Pt's Name:</span> <span class="patient-name">{{ prescription.patient.name }}</span></span>
+            <span><span class="field-label">Gender:</span> {{ prescription.patient.get_gender_display }}</span>
+            <span><span class="field-label">Age:</span> {{ prescription.patient.age|default:"" }}</span>
+            <span><span class="field-label">Weight:</span> {{ prescription.patient.weight|default:"" }}</span>
+            <span><span class="field-label">Date:</span> {{ prescription.date|date:"d/m/y" }}</span>
+        </div>
+
+        <div class="patient-info-row">
+            <span><span class="field-label">Patient ID:</span> <strong>{{ prescription.patient.patient_id }}</strong></span>
+            <span>
+                {% if prescription.dm %}DM{% endif %}
+                {% if prescription.htn %}/ HTN{% endif %}
+                {% if prescription.ihd %}/ IHD{% endif %}
+                {% if prescription.tb %}/ TB{% endif %}
+                {% if prescription.smoking %}/ Smoking{% endif %}
+            </span>
+            <span>
+                {% if prescription.is_first_visit %}1st Visit{% else %}Follow-up{% endif %}
+            </span>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column - Clinical Record -->
+            <div class="left-column">
+                <div class="section-title">Clinical Record:</div>
+                <div class="clinical-record">
+                    {{ prescription.clinical_record|linebreaks }}
+                </div>
+
+                {% if prescription.pulse or prescription.spo2 %}
+                <div style="margin-top: 10mm;">
+                    {% if prescription.pulse %}
+                    <div><strong>Pulse:</strong> {{ prescription.pulse }}</div>
+                    {% endif %}
+                    {% if prescription.spo2 %}
+                    <div><strong>SPO2:</strong> {{ prescription.spo2 }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if prescription.chest_notes %}
+                <div style="margin-top: 5mm;">
+                    <strong>Chest:</strong> {{ prescription.chest_notes }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column - Rx -->
+            <div class="right-column">
+                <div class="rx-header">℞</div>
+
+                {% if prescription.medicines.exists %}
+                <table class="medicines-table">
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th class="timing-header">M</th>
+                            <th class="timing-header">A</th>
+                            <th class="timing-header">E</th>
+                            <th class="timing-header">N</th>
+                            <th>Days</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for med in prescription.medicines.all %}
+                        <tr>
+                            <td>{{ med.medicine }}{% if med.dosage %} - {{ med.dosage }}{% endif %}</td>
+                            <td class="timing-cell">{% if med.morning %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.afternoon %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.evening %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td class="timing-cell">{% if med.night %}<span class="check">✓</span>{% else %}-{% endif %}</td>
+                            <td>{{ med.days }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                {% if prescription.special_instructions %}
+                <div class="instructions-section">
+                    <div class="section-title">Instructions:</div>
+                    <div class="instructions-list">
+                        {{ prescription.special_instructions|linebreaks }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Lab Tests -->
+        {% if prescription.tests_ordered.exists %}
+        <div class="lab-tests-section">
+            <h4>Lab Tests Ordered:</h4>
+            {% for test in prescription.tests_ordered.all %}
+            <span class="test-item">☑ {{ test }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="follow-up">
+                <strong>Follow up:</strong> {{ prescription.follow_up|default:"_________________" }}
+            </div>
+            <div class="signature-area">
+                <div class="signature-line">
+                    Doctor's Signature
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

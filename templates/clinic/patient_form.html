@@ -1,0 +1,115 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}{{ title }} - Prescripto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-page">
+        <div class="form-header">
+            <h1><i class="fas fa-user-plus"></i> {{ title }}</h1>
+            {% if patient %}
+            <p class="patient-id-display">Patient ID: <strong>{{ patient.patient_id }}</strong></p>
+            {% endif %}
+        </div>
+
+        <!-- Duplicate Warning -->
+        {% if show_duplicate_warning and existing_patients %}
+        <div class="duplicate-warning-card">
+            <div class="warning-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Potential Duplicate Patient Found!</h3>
+            </div>
+            <p>A patient with similar details already exists. If this is a returning patient, please use their existing record:</p>
+            
+            <div class="existing-patients-list">
+                {% for patient in existing_patients %}
+                <div class="existing-patient-item">
+                    <div class="patient-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="patient-info">
+                        <strong>{{ patient.name }}</strong>
+                        <span class="patient-id">{{ patient.patient_id }}</span>
+                        <span class="patient-meta">{{ patient.get_gender_display }} | {{ patient.age|default:"N/A" }} yrs</span>
+                    </div>
+                    <div class="patient-actions">
+                        <a href="{% url 'prescription_create' patient.pk %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Prescription
+                        </a>
+                        <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline">
+                            <i class="fas fa-folder-open"></i> View History
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="warning-divider">
+                <span>OR</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="form-card">
+            <form method="post" class="patient-form">
+                {% csrf_token %}
+                
+                {% if show_duplicate_warning %}
+                <input type="hidden" name="confirm_new" value="true">
+                {% endif %}
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_name">Patient Name *</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <span class="error">{{ form.name.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_gender">Gender *</label>
+                        {{ form.gender }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_age">Age</label>
+                        {{ form.age }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_weight">Weight (kg)</label>
+                        {{ form.weight }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_phone">Phone Number</label>
+                        {{ form.phone }}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="id_address">Address</label>
+                        {{ form.address }}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% url 'home' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        {% if show_duplicate_warning %}
+                            Create as New Patient Anyway
+                        {% elif patient %}
+                            Update Patient
+                        {% else %}
+                            Save & Create Prescription
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

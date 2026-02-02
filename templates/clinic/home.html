@@ -1,0 +1,112 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Prescripto - Home{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-content">
+        <h1><i class="fas fa-stethoscope"></i> Welcome to Prescripto</h1>
+        <p>Digital Prescription Management System for Healthcare Professionals</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="{% url 'patient_create' %}" class="action-card action-primary">
+                <div class="action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h3>Add New Patient</h3>
+                <p>Register a new patient and create prescription</p>
+            </a>
+
+            <a href="{% url 'medicine_create' %}" class="action-card action-secondary">
+                <div class="action-icon">
+                    <i class="fas fa-pills"></i>
+                </div>
+                <h3>Add Medicines</h3>
+                <p>Add new medicines to the database</p>
+            </a>
+
+            <a href="{% url 'patient_search' %}" class="action-card action-tertiary">
+                <div class="action-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Search Patient</h3>
+                <p>Find patient by ID or name</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ stats.total_patients }}</span>
+                    <span class="stat-label">Total Patients</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-file-prescription"></i></div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ stats.total_prescriptions }}</span>
+                    <span class="stat-label">Prescriptions</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-capsules"></i></div>
+                <div class="stat-info">
+                    <span class="stat-number">{{ stats.total_medicines }}</span>
+                    <span class="stat-label">Medicines</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Activity -->
+    <section class="recent-section">
+        <div class="recent-grid">
+            <div class="recent-card">
+                <h3><i class="fas fa-clock"></i> Recent Patients</h3>
+                {% if recent_patients %}
+                <ul class="recent-list">
+                    {% for patient in recent_patients %}
+                    <li>
+                        <a href="{% url 'patient_detail' patient.pk %}">
+                            <span class="patient-id">{{ patient.patient_id }}</span>
+                            <span class="patient-name">{{ patient.name }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="empty-message">No patients registered yet</p>
+                {% endif %}
+            </div>
+
+            <div class="recent-card">
+                <h3><i class="fas fa-prescription"></i> Recent Prescriptions</h3>
+                {% if recent_prescriptions %}
+                <ul class="recent-list">
+                    {% for prescription in recent_prescriptions %}
+                    <li>
+                        <a href="{% url 'prescription_detail' prescription.pk %}">
+                            <span class="patient-name">{{ prescription.patient.name }}</span>
+                            <span class="prescription-date">{{ prescription.date|date:"d M Y" }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="empty-message">No prescriptions created yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}{{ title }} - Prescripto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="prescription-form-page">
+        <!-- Patient Info Banner -->
+        <div class="patient-banner">
+            <div class="patient-info">
+                <h2><i class="fas fa-user"></i> {{ patient.name }}</h2>
+                <span class="patient-id">{{ patient.patient_id }}</span>
+                <span class="patient-meta">{{ patient.get_gender_display }} | {{ patient.age|default:"N/A" }} yrs | {{
+                    patient.weight|default:"N/A" }} kg</span>
+            </div>
+            <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-outline">
+                <i class="fas fa-history"></i> View History
+            </a>
+        </div>
+
+        <form method="post" class="prescription-form" id="prescriptionForm">
+            {% csrf_token %}
+
+            <div class="form-sections">
+                <!-- Clinical Information -->
+                <section class="form-section">
+                    <h3><i class="fas fa-notes-medical"></i> Clinical Information</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_date">Date</label>
+                            {{ form.date }}
+                        </div>
+                        <div class="form-group checkbox-inline">
+                            <label class="checkbox-label">
+                                {{ form.is_first_visit }}
+                                <span>First Visit</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_clinical_record">Clinical Record / Diagnosis</label>
+                        {{ form.clinical_record }}
+                    </div>
+
+                    <div class="medical-history-checkboxes">
+                        <span class="label">Medical History:</span>
+                        <label class="checkbox-label">{{ form.dm }} DM</label>
+                        <label class="checkbox-label">{{ form.htn }} HTN</label>
+                        <label class="checkbox-label">{{ form.ihd }} IHD</label>
+                        <label class="checkbox-label">{{ form.tb }} TB</label>
+                        <label class="checkbox-label">{{ form.smoking }} Smoking</label>
+                    </div>
+                </section>
+
+                <!-- Vitals -->
+                <section class="form-section">
+                    <h3><i class="fas fa-heartbeat"></i> Vitals</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_pulse">Pulse</label>
+                            {{ form.pulse }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_spo2">SPO2</label>
+                            {{ form.spo2 }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_chest_notes">Chest Notes</label>
+                        {{ form.chest_notes }}
+                    </div>
+                </section>
+
+                <!-- Medicines (Rx) -->
+                <section class="form-section medicines-section">
+                    <h3><i class="fas fa-prescription"></i> Rx - Medicines</h3>
+
+                    <div class="medicines-table" id="medicinesTable">
+                        <div class="table-header">
+                            <span class="col-medicine">Medicine</span>
+                            <span class="col-dosage">Dosage</span>
+                            <span class="col-timing">
+                                <span title="Morning">M</span>
+                                <span title="Afternoon">A</span>
+                                <span title="Evening">E</span>
+                                <span title="Night">N</span>
+                            </span>
+                            <span class="col-days">Days</span>
+                            <span class="col-instructions">Instructions</span>
+                            <span class="col-delete"></span>
+                        </div>
+
+                        {{ formset.management_form }}
+                        {% for medicine_form in formset %}
+                        <div class="medicine-row" data-index="{{ forloop.counter0 }}">
+                            {{ medicine_form.id }}
+                            <div class="col-medicine">
+                                {{ medicine_form.medicine }}
+                            </div>
+                            <div class="col-dosage">
+                                {{ medicine_form.dosage }}
+                            </div>
+                            <div class="col-timing">
+                                <label class="timing-check" title="Morning">{{ medicine_form.morning }}</label>
+                                <label class="timing-check" title="Afternoon">{{ medicine_form.afternoon }}</label>
+                                <label class="timing-check" title="Evening">{{ medicine_form.evening }}</label>
+                                <label class="timing-check" title="Night">{{ medicine_form.night }}</label>
+                            </div>
+                            <div class="col-days">
+                                {{ medicine_form.days }}
+                            </div>
+                            <div class="col-instructions">
+                                {{ medicine_form.instructions }}
+                            </div>
+                            <div class="col-delete">
+                                {% if medicine_form.DELETE %}
+                                <label class="delete-check">{{ medicine_form.DELETE }}</label>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="button" class="btn btn-outline add-medicine-btn" onclick="addMedicineRow()">
+                        <i class="fas fa-plus"></i> Add Medicine
+                    </button>
+                </section>
+
+                <!-- Lab Tests -->
+                <section class="form-section">
+                    <h3><i class="fas fa-flask"></i> Lab Tests</h3>
+                    <div class="lab-tests-grid">
+                        {{ form.tests_ordered }}
+                    </div>
+                </section>
+
+                <!-- Instructions -->
+                <section class="form-section">
+                    <h3><i class="fas fa-clipboard-list"></i> Instructions & Follow-up</h3>
+                    <div class="form-group">
+                        <label for="id_special_instructions">Special Instructions</label>
+                        {{ form.special_instructions }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_follow_up">Follow-up</label>
+                        {{ form.follow_up }}
+                    </div>
+                </section>
+            </div>
+
+            <div class="form-actions sticky-actions">
+                <a href="{% url 'patient_detail' patient.pk %}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Prescription
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Get initial form count from the management form
+    let formIndex = parseInt(document.getElementById('id_medicines-TOTAL_FORMS').value) || 0;
+
+    function addMedicineRow() {
+        const container = document.getElementById('medicinesTable');
+        const totalForms = document.getElementById('id_medicines-TOTAL_FORMS');
+
+        const newRow = document.createElement('div');
+        newRow.className = 'medicine-row';
+        newRow.dataset.index = formIndex;
+
+        // Clone the structure from an existing row
+        const existingRow = container.querySelector('.medicine-row');
+        if (existingRow) {
+            newRow.innerHTML = existingRow.innerHTML.replace(/-\d+-/g, `-${formIndex}-`);
+
+            // Clear values in the new row
+            newRow.querySelectorAll('input, select').forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else if (input.tagName === 'SELECT') {
+                    input.selectedIndex = 0;
+                } else if (input.type !== 'hidden') {
+                    input.value = input.name.includes('days') ? '1' : '';
+                }
+            });
+
+            // Clear the hidden id field for new forms
+            const idField = newRow.querySelector('input[name$="-id"]');
+            if (idField) {
+                idField.value = '';
+            }
+        }
+
+        container.appendChild(newRow);
+        formIndex++;
+        totalForms.value = formIndex;
+    }
+</script>
+{% endblock %}

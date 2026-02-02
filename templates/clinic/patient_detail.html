@@ -1,0 +1,106 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}{{ patient.name }} - Patient Details{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="patient-detail-page">
+        <!-- Patient Info Card -->
+        <div class="patient-info-card">
+            <div class="patient-header">
+                <div class="patient-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="patient-main-info">
+                    <h1>{{ patient.name }}</h1>
+                    <span class="patient-id-badge">{{ patient.patient_id }}</span>
+                </div>
+                <div class="patient-actions">
+                    <a href="{% url 'patient_edit' patient.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a href="{% url 'prescription_create' patient.pk %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Prescription
+                    </a>
+                </div>
+            </div>
+
+            <div class="patient-details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Gender</span>
+                    <span class="detail-value">{{ patient.get_gender_display }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Age</span>
+                    <span class="detail-value">{{ patient.age|default:"N/A" }} years</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Weight</span>
+                    <span class="detail-value">{{ patient.weight|default:"N/A" }} kg</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Phone</span>
+                    <span class="detail-value">{{ patient.phone|default:"N/A" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">First Visit</span>
+                    <span class="detail-value">{{ patient.created_at|date:"d M Y" }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Visits</span>
+                    <span class="detail-value">{{ prescriptions.count }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescription History -->
+        <div class="prescription-history">
+            <h2><i class="fas fa-history"></i> Prescription History</h2>
+
+            {% if prescriptions %}
+            <div class="prescriptions-list">
+                {% for prescription in prescriptions %}
+                <div class="prescription-card">
+                    <div class="prescription-date">
+                        <span class="day">{{ prescription.date|date:"d" }}</span>
+                        <span class="month">{{ prescription.date|date:"M" }}</span>
+                        <span class="year">{{ prescription.date|date:"Y" }}</span>
+                    </div>
+                    <div class="prescription-info">
+                        <h4>
+                            {% if prescription.is_first_visit %}
+                            <span class="badge badge-info">First Visit</span>
+                            {% endif %}
+                            Prescription
+                        </h4>
+                        <p class="clinical-notes">{{ prescription.clinical_record|truncatewords:15|default:"No clinical
+                            notes" }}</p>
+                        <p class="medicines-count">
+                            <i class="fas fa-pills"></i> {{ prescription.medicines.count }} medicine(s) prescribed
+                        </p>
+                    </div>
+                    <div class="prescription-actions">
+                        <a href="{% url 'prescription_detail' prescription.pk %}" class="btn btn-sm btn-outline">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{% url 'prescription_print' prescription.pk %}" class="btn btn-sm btn-outline"
+                            target="_blank">
+                            <i class="fas fa-print"></i> Print
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-medical"></i>
+                <p>No prescriptions yet</p>
+                <a href="{% url 'prescription_create' patient.pk %}" class="btn btn-primary">
+                    Create First Prescription
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
