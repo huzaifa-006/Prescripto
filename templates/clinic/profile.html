@@ -1,0 +1,252 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}My Profile - Prescripto{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-page">
+        <div class="page-header">
+            <h1><i class="fas fa-user-md"></i> My Profile</h1>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Profile Information Card -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-id-card"></i> Personal Information</h2>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_profile">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="doctor_name" value="{{ doctor.name }}" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="title" value="{{ doctor.title|default:'' }}" class="form-control"
+                                placeholder="e.g., Associate Professor">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Specialization</label>
+                        <input type="text" name="specialization" value="{{ doctor.specialization|default:'' }}"
+                            class="form-control" placeholder="e.g., Cardiology">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Credentials</label>
+                        <input type="text" name="credentials" value="{{ doctor.credentials|default:'' }}"
+                            class="form-control" placeholder="e.g., MBBS, MD, FCPS">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" value="{{ user.email }}" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Number</label>
+                            <input type="tel" name="contact_number" value="{{ doctor.contact_number|default:'' }}"
+                                class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-section-title">Hospital/Clinic Details</div>
+
+                    <div class="form-group">
+                        <label>Hospital/Clinic Name</label>
+                        <input type="text" name="hospital_name" value="{{ doctor.hospital_name|default:'' }}"
+                            class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea name="hospital_address" class="form-control"
+                            rows="2">{{ doctor.hospital_address|default:'' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tagline</label>
+                        <input type="text" name="hospital_tagline" value="{{ doctor.hospital_tagline|default:'' }}"
+                            class="form-control" placeholder="e.g., Because Your Health Matters">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Password Change Card -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-lock"></i> Change Password</h2>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_password">
+
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="current_password" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" name="new_password" class="form-control" required
+                            placeholder="Min 6 characters">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirm_new_password" class="form-control" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-secondary">
+                            <i class="fas fa-key"></i> Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Account Info Card -->
+            <div class="profile-card account-info">
+                <div class="card-header">
+                    <h2><i class="fas fa-info-circle"></i> Account Information</h2>
+                </div>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Username</span>
+                        <span class="info-value">{{ user.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Account Created</span>
+                        <span class="info-value">{{ user.date_joined|date:"d M Y" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Login</span>
+                        <span class="info-value">{{ user.last_login|date:"d M Y, H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-page {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-card:first-child {
+        grid-column: 1 / -1;
+    }
+
+    .card-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e8f4f8;
+    }
+
+    .card-header h2 {
+        color: #1a5f7a;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .form-section-title {
+        font-weight: 600;
+        color: #1a5f7a;
+        margin: 1.5rem 0 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .form-actions {
+        margin-top: 1.5rem;
+    }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .info-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        font-weight: 500;
+        color: #333;
+    }
+
+    @media (max-width: 768px) {
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-card:first-child {
+            grid-column: 1;
+        }
+
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+</style>
+{% endblock %}
