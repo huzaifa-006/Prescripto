@@ -1,0 +1,647 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Dashboard - Prescripto{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1><i class="fas fa-chart-line"></i> Dashboard</h1>
+            <p class="text-muted">Welcome back! Here's your clinic overview.</p>
+        </div>
+        <a href="{% url 'patient_create' %}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> New Patient
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon today"><i class="fas fa-calendar-day"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.today_prescriptions }}</div>
+                <div class="stat-label">Today's Prescriptions</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon patients"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.today_patients }}</div>
+                <div class="stat-label">Patients Today</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon week"><i class="fas fa-calendar-week"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.week_prescriptions }}</div>
+                <div class="stat-label">This Week</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon month"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-info">
+                <div class="stat-value">{{ stats.month_prescriptions }}</div>
+                <div class="stat-label">This Month</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions - Horizontal -->
+    <div class="quick-actions-section">
+        <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+        <div class="quick-actions-row">
+            <a href="{% url 'patient_create' %}" class="quick-btn">
+                <i class="fas fa-user-plus"></i>
+                <span>New Patient</span>
+            </a>
+            <a href="{% url 'patient_search' %}" class="quick-btn">
+                <i class="fas fa-search"></i>
+                <span>Search Patient</span>
+            </a>
+            <a href="{% url 'medicine_list' %}" class="quick-btn">
+                <i class="fas fa-pills"></i>
+                <span>Medicines</span>
+            </a>
+            <a href="{% url 'template_list' %}" class="quick-btn">
+                <i class="fas fa-file-medical"></i>
+                <span>Templates</span>
+            </a>
+            <a href="{% url 'profile' %}" class="quick-btn">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Prescriptions - Full Width -->
+    <div class="recent-section">
+        <div class="section-header">
+            <h2><i class="fas fa-file-prescription"></i> Recent Prescriptions</h2>
+            <a href="{% url 'patient_search' %}" class="btn btn-outline">View All</a>
+        </div>
+        <div class="prescriptions-table">
+            {% if recent_prescriptions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient Name</th>
+                        <th>Patient ID</th>
+                        <th>Date</th>
+                        <th>Diagnosis</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in recent_prescriptions %}
+                    <tr>
+                        <td class="patient-name">{{ prescription.patient.name }}</td>
+                        <td class="patient-id">{{ prescription.patient.patient_id }}</td>
+                        <td>{{ prescription.date|date:"d M Y" }}</td>
+                        <td class="diagnosis">{{ prescription.clinical_record|truncatewords:5|default:"-" }}</td>
+                        <td class="actions">
+                            <a href="{% url 'prescription_detail' prescription.pk %}" class="action-btn view"
+                                title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'prescription_print' prescription.pk %}" class="action-btn print"
+                                title="Print">
+                                <i class="fas fa-print"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-file-prescription"></i>
+                <p>No prescriptions yet. Create your first prescription!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bottom Grid: Top Medicines & Total Stats -->
+    <div class="bottom-grid">
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-bar"></i> Top Prescribed (30 days)</h3>
+            </div>
+            <div class="card-body">
+                {% if top_medicines %}
+                <div class="medicines-list">
+                    {% for med in top_medicines %}
+                    <div class="medicine-item">
+                        <div class="medicine-info">
+                            <span class="medicine-name">{{ med.medicine__form }} {{ med.medicine__name }}</span>
+                            <span class="medicine-count">{{ med.count }}×</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" style="width: {% widthratio med.count top_medicines.0.count 100 %}%">
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="empty-text">No prescription data yet</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3><i class="fas fa-database"></i> Total Records</h3>
+            </div>
+            <div class="card-body">
+                <div class="total-stats">
+                    <div class="total-item">
+                        <i class="fas fa-users"></i>
+                        <div>
+                            <span class="total-value">{{ stats.total_patients }}</span>
+                            <span class="total-label">Patients</span>
+                        </div>
+                    </div>
+                    <div class="total-item">
+                        <i class="fas fa-file-prescription"></i>
+                        <div>
+                            <span class="total-value">{{ stats.total_prescriptions }}</span>
+                            <span class="total-label">Prescriptions</span>
+                        </div>
+                    </div>
+                    <div class="total-item">
+                        <i class="fas fa-pills"></i>
+                        <div>
+                            <span class="total-value">{{ stats.total_medicines }}</span>
+                            <span class="total-label">Medicines</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .dashboard {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 1.5rem;
+    }
+
+    /* Header */
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .dashboard-header h1 {
+        color: #1a5f7a;
+        margin-bottom: 0.25rem;
+        font-size: 1.75rem;
+    }
+
+    .text-muted {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        color: white;
+    }
+
+    .stat-icon.today {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+
+    .stat-icon.patients {
+        background: linear-gradient(135deg, #1a5f7a, #2c3e50);
+    }
+
+    .stat-icon.week {
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+    }
+
+    .stat-icon.month {
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a1a1a;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions-section {
+        margin-bottom: 2rem;
+    }
+
+    .quick-actions-section h2 {
+        color: #1a5f7a;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quick-actions-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-btn {
+        flex: 1;
+        min-width: 160px;
+        padding: 1.5rem 2rem;
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .quick-btn:hover {
+        border-color: #1a5f7a;
+        background: linear-gradient(135deg, #1a5f7a, #2c3e50);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(26, 95, 122, 0.25);
+    }
+
+    .quick-btn i {
+        font-size: 1.5rem;
+    }
+
+    .quick-btn span {
+        font-weight: 600;
+        font-size: 1.05rem;
+    }
+
+    /* Recent Prescriptions */
+    .recent-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+        color: #1a5f7a;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .btn-outline {
+        padding: 0.5rem 1rem;
+        border: 2px solid #1a5f7a;
+        color: #1a5f7a;
+        background: transparent;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline:hover {
+        background: #1a5f7a;
+        color: white;
+    }
+
+    .prescriptions-table {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .prescriptions-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .prescriptions-table th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .prescriptions-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .prescriptions-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .prescriptions-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .patient-name {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .patient-id {
+        color: #888;
+        font-size: 0.9rem;
+    }
+
+    .diagnosis {
+        color: #666;
+        font-size: 0.9rem;
+        max-width: 200px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .action-btn.view {
+        background: #e8f4f8;
+        color: #1a5f7a;
+    }
+
+    .action-btn.print {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .action-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .empty-state {
+        padding: 3rem;
+        text-align: center;
+        color: #888;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    /* Bottom Grid */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .card-header h3 {
+        color: #1a5f7a;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    /* Medicines List */
+    .medicines-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .medicine-item {}
+
+    .medicine-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.4rem;
+    }
+
+    .medicine-name {
+        font-weight: 500;
+        color: #333;
+        font-size: 0.9rem;
+    }
+
+    .medicine-count {
+        color: #1a5f7a;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .progress-bar {
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress {
+        height: 100%;
+        background: linear-gradient(90deg, #1a5f7a, #667eea);
+        border-radius: 3px;
+    }
+
+    /* Total Stats */
+    .total-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .total-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .total-item i {
+        font-size: 1.25rem;
+        color: #1a5f7a;
+        width: 30px;
+    }
+
+    .total-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #333;
+        display: block;
+    }
+
+    .total-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .empty-text {
+        color: #888;
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .bottom-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .prescriptions-table {
+            overflow-x: auto;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard {
+            padding: 1rem;
+        }
+
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            padding: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 1.2rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+        }
+
+        .quick-actions-row {
+            flex-direction: column;
+        }
+
+        .quick-btn {
+            min-width: 100%;
+        }
+
+        .prescriptions-table table {
+            min-width: 600px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stat-card {
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %}
