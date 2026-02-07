@@ -1,35 +1,260 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import Patient, Medicine, Prescription, PrescriptionMedicine, LabTest
-from .forms import PatientForm, MedicineForm, PrescriptionForm, PrescriptionMedicineFormSet
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import timedelta
+from .models import Patient, Medicine, Prescription, PrescriptionMedicine, LabTest, Doctor, PrescriptionTemplate, TemplateMedicine
+from .forms import (
+    PatientForm,
+    MedicineForm,
+    PrescriptionForm,
+    PrescriptionMedicineFormSet,
+    PrescriptionMedicineEditFormSet,
+)
 
 
-def home(request):
-    """Home page with navigation buttons"""
-    recent_patients = Patient.objects.all()[:5]
-    recent_prescriptions = Prescription.objects.all()[:5]
+# ============ Authentication Views ============
+
+def login_view(request):
+    """Doctor login page"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.username}!')
+            next_url = request.GET.get('next', 'dashboard')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Invalid username or password.')
+    
+    return render(request, 'clinic/login.html')
+
+
+def logout_view(request):
+    """Logout and redirect to login"""
+    logout(request)
+    messages.info(request, 'You have been logged out.')
+    return redirect('login')
+
+
+def signup_view(request):
+    """Doctor signup/registration page"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        from django.contrib.auth.models import User
+        
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        doctor_name = request.POST.get('doctor_name', '').strip()
+        
+        # Validation
+        errors = []
+        if not username:
+            errors.append('Username is required.')
+        elif User.objects.filter(username=username).exists():
+            errors.append('Username already exists.')
+        
+        if not password:
+            errors.append('Password is required.')
+        elif len(password) < 6:
+            errors.append('Password must be at least 6 characters.')
+        elif password != confirm_password:
+            errors.append('Passwords do not match.')
+        
+        if not doctor_name:
+            errors.append('Doctor name is required.')
+        
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            # Create user
+            user = User.objects.create_user(
+                username=username,
+                password=password
+            )
+            
+            # Create doctor profile
+            Doctor.objects.create(
+                user=user,
+                name=doctor_name
+            )
+            
+            messages.success(request, 'Account created successfully! Please login.')
+            return redirect('login')
+    
+    return render(request, 'clinic/signup.html')
+
+
+def forgot_password_view(request):
+    """Forgot password - reset by verifying doctor name"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        from django.contrib.auth.models import User
+        
+        username = request.POST.get('username', '').strip()
+        doctor_name = request.POST.get('doctor_name', '').strip()
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+        
+        # Validation
+        if not username or not doctor_name:
+            messages.error(request, 'Please fill in all fields.')
+        elif not new_password:
+            messages.error(request, 'Please enter a new password.')
+        elif len(new_password) < 6:
+            messages.error(request, 'Password must be at least 6 characters.')
+        elif new_password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+        else:
+            try:
+                user = User.objects.get(username=username)
+                # Verify doctor name matches
+                if hasattr(user, 'doctor') and user.doctor.name.lower() == doctor_name.lower():
+                    user.set_password(new_password)
+                    user.save()
+                    messages.success(request, 'Password reset successfully! Please login with your new password.')
+                    return redirect('login')
+                else:
+                    messages.error(request, 'Username and Doctor Name do not match our records.')
+            except User.DoesNotExist:
+                messages.error(request, 'Username not found.')
+    
+    return render(request, 'clinic/forgot_password.html')
+
+
+@login_required
+def profile_view(request):
+    """Doctor profile management page"""
+    from django.contrib.auth import update_session_auth_hash
+    
+    # Get or create doctor profile
+    try:
+        doctor = request.user.doctor
+    except Doctor.DoesNotExist:
+        doctor = Doctor.objects.create(user=request.user, name=request.user.username)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'update_profile':
+            # Update doctor profile
+            doctor.name = request.POST.get('doctor_name', doctor.name)
+            doctor.title = request.POST.get('title', doctor.title)
+            doctor.specialization = request.POST.get('specialization', doctor.specialization)
+            doctor.credentials = request.POST.get('credentials', doctor.credentials)
+            doctor.contact_number = request.POST.get('contact_number', doctor.contact_number)
+            doctor.hospital_name = request.POST.get('hospital_name', doctor.hospital_name)
+            doctor.hospital_address = request.POST.get('hospital_address', doctor.hospital_address)
+            doctor.hospital_tagline = request.POST.get('hospital_tagline', doctor.hospital_tagline)
+            doctor.save()
+            
+            # Update user email
+            new_email = request.POST.get('email', '').strip()
+            if new_email and new_email != request.user.email:
+                request.user.email = new_email
+                request.user.save()
+            
+            messages.success(request, 'Profile updated successfully!')
+        
+        elif action == 'change_password':
+            current_password = request.POST.get('current_password', '')
+            new_password = request.POST.get('new_password', '')
+            confirm_password = request.POST.get('confirm_new_password', '')
+            
+            if not request.user.check_password(current_password):
+                messages.error(request, 'Current password is incorrect.')
+            elif len(new_password) < 6:
+                messages.error(request, 'New password must be at least 6 characters.')
+            elif new_password != confirm_password:
+                messages.error(request, 'New passwords do not match.')
+            else:
+                request.user.set_password(new_password)
+                request.user.save()
+                update_session_auth_hash(request, request.user)
+                messages.success(request, 'Password changed successfully!')
+        
+        return redirect('profile')
+    
+    return render(request, 'clinic/profile.html', {'doctor': doctor})
+
+
+# ============ Dashboard View ============
+
+@login_required
+def dashboard(request):
+    """Dashboard with statistics and quick actions"""
+    today = timezone.now().date()
+    week_ago = today - timedelta(days=7)
+    month_ago = today - timedelta(days=30)
+    
+    # Basic stats
     stats = {
         'total_patients': Patient.objects.count(),
         'total_prescriptions': Prescription.objects.count(),
         'total_medicines': Medicine.objects.filter(is_active=True).count(),
+        'today_patients': Prescription.objects.filter(date=today).values('patient').distinct().count(),
+        'today_prescriptions': Prescription.objects.filter(date=today).count(),
+        'week_prescriptions': Prescription.objects.filter(date__gte=week_ago).count(),
+        'month_prescriptions': Prescription.objects.filter(date__gte=month_ago).count(),
     }
-    return render(request, 'clinic/home.html', {
+    
+    # Top prescribed medicines (last 30 days)
+    top_medicines = PrescriptionMedicine.objects.filter(
+        prescription__date__gte=month_ago
+    ).exclude(medicine__isnull=True).values(
+        'medicine__name', 'medicine__form'
+    ).annotate(count=Count('id')).order_by('-count')[:5]
+    
+    # Recent patients
+    recent_patients = Patient.objects.all()[:5]
+    
+    # Recent prescriptions
+    recent_prescriptions = Prescription.objects.select_related('patient').all()[:5]
+    
+    # Get templates for quick access
+    templates = PrescriptionTemplate.objects.filter(is_active=True)[:5]
+    
+    return render(request, 'clinic/dashboard.html', {
+        'stats': stats,
+        'top_medicines': top_medicines,
         'recent_patients': recent_patients,
         'recent_prescriptions': recent_prescriptions,
-        'stats': stats,
+        'templates': templates,
     })
+
+
+def home(request):
+    """Home page - redirects to dashboard if logged in"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return redirect('login')
 
 
 # ============ Patient Views ============
 
+@login_required
 def patient_list(request):
     """List all patients"""
     patients = Patient.objects.all()
     return render(request, 'clinic/patient_list.html', {'patients': patients})
 
 
+@login_required
 def patient_create(request):
     """Create a new patient with duplicate detection"""
     existing_patients = []
@@ -74,6 +299,7 @@ def patient_create(request):
     return render(request, 'clinic/patient_form.html', {'form': form, 'title': 'Add New Patient'})
 
 
+@login_required
 def patient_edit(request, pk):
     """Edit an existing patient"""
     patient = get_object_or_404(Patient, pk=pk)
@@ -88,6 +314,7 @@ def patient_edit(request, pk):
     return render(request, 'clinic/patient_form.html', {'form': form, 'title': 'Edit Patient', 'patient': patient})
 
 
+@login_required
 def patient_detail(request, pk):
     """View patient details with prescription history"""
     patient = get_object_or_404(Patient, pk=pk)
@@ -98,6 +325,7 @@ def patient_detail(request, pk):
     })
 
 
+@login_required
 def patient_search(request):
     """Search for patients"""
     query = request.GET.get('q', '')
@@ -113,6 +341,7 @@ def patient_search(request):
 
 # ============ Medicine Views ============
 
+@login_required
 def medicine_list(request):
     """List all medicines"""
     query = request.GET.get('q', '')
@@ -125,6 +354,7 @@ def medicine_list(request):
     return render(request, 'clinic/medicine_list.html', {'medicines': medicines, 'query': query})
 
 
+@login_required
 def medicine_create(request):
     """Add a new medicine"""
     if request.method == 'POST':
@@ -138,6 +368,7 @@ def medicine_create(request):
     return render(request, 'clinic/medicine_form.html', {'form': form, 'title': 'Add New Medicine'})
 
 
+@login_required
 def medicine_edit(request, pk):
     """Edit a medicine"""
     medicine = get_object_or_404(Medicine, pk=pk)
@@ -154,10 +385,12 @@ def medicine_edit(request, pk):
 
 # ============ Prescription Views ============
 
+@login_required
 def prescription_create(request, patient_id):
     """Create a prescription for a patient"""
     patient = get_object_or_404(Patient, pk=patient_id)
     lab_tests = LabTest.objects.filter(is_active=True)
+    templates = PrescriptionTemplate.objects.filter(is_active=True)
     
     if request.method == 'POST':
         form = PrescriptionForm(request.POST)
@@ -166,6 +399,13 @@ def prescription_create(request, patient_id):
         if form.is_valid() and formset.is_valid():
             prescription = form.save(commit=False)
             prescription.patient = patient
+            
+            # Link to doctor if logged in and has doctor profile
+            if request.user.is_authenticated:
+                try:
+                    prescription.doctor = request.user.doctor
+                except Doctor.DoesNotExist:
+                    pass
             
             # Check if this is not the first visit
             if patient.prescriptions.exists():
@@ -214,7 +454,6 @@ def prescription_create(request, patient_id):
             formset = PrescriptionMedicineFormSet(request.POST)
     else:
         # Set default date to today
-        from django.utils import timezone
         initial = {'date': timezone.now().date()}
         
         # Check if first visit
@@ -234,31 +473,36 @@ def prescription_create(request, patient_id):
         'patient': patient,
         'medicines': medicines,
         'lab_tests': lab_tests,
+        'templates': templates,
         'title': 'New Prescription',
     })
 
 
+@login_required
 def prescription_detail(request, pk):
     """View prescription details"""
     prescription = get_object_or_404(Prescription, pk=pk)
     return render(request, 'clinic/prescription_detail.html', {'prescription': prescription})
 
 
+@login_required
 def prescription_print(request, pk):
     """Print-friendly prescription view"""
     prescription = get_object_or_404(Prescription, pk=pk)
     return render(request, 'clinic/prescription_print.html', {'prescription': prescription})
 
 
+@login_required
 def prescription_edit(request, pk):
     """Edit an existing prescription"""
     prescription = get_object_or_404(Prescription, pk=pk)
     patient = prescription.patient
     lab_tests = LabTest.objects.filter(is_active=True)
+    templates = PrescriptionTemplate.objects.filter(is_active=True)
     
     if request.method == 'POST':
         form = PrescriptionForm(request.POST, instance=prescription)
-        formset = PrescriptionMedicineFormSet(request.POST, instance=prescription)
+        formset = PrescriptionMedicineEditFormSet(request.POST, instance=prescription)
         
         if form.is_valid() and formset.is_valid():
             form.save()
@@ -267,7 +511,7 @@ def prescription_edit(request, pk):
             return redirect('prescription_detail', pk=prescription.pk)
     else:
         form = PrescriptionForm(instance=prescription)
-        formset = PrescriptionMedicineFormSet(instance=prescription)
+        formset = PrescriptionMedicineEditFormSet(instance=prescription)
     
     medicines = Medicine.objects.filter(is_active=True)
     
@@ -278,8 +522,150 @@ def prescription_edit(request, pk):
         'prescription': prescription,
         'medicines': medicines,
         'lab_tests': lab_tests,
+        'templates': templates,
         'title': 'Edit Prescription',
     })
+
+
+@login_required
+def prescription_delete(request, pk):
+    """Delete a prescription"""
+    prescription = get_object_or_404(Prescription, pk=pk)
+    patient_id = prescription.patient.id
+    
+    if request.method == 'POST':
+        prescription.delete()
+        messages.success(request, 'Prescription deleted successfully.')
+        return redirect('patient_detail', pk=patient_id)
+    
+    return render(request, 'clinic/prescription_confirm_delete.html', {'prescription': prescription})
+
+
+@login_required
+def prescription_duplicate(request, pk):
+    """Duplicate an existing prescription"""
+    original = get_object_or_404(Prescription, pk=pk)
+    
+    # Create new prescription with same data
+    new_prescription = Prescription.objects.create(
+        patient=original.patient,
+        doctor=original.doctor,
+        date=timezone.now().date(),
+        clinical_record=original.clinical_record,
+        dm=original.dm,
+        htn=original.htn,
+        ihd=original.ihd,
+        tb=original.tb,
+        smoking=original.smoking,
+        is_first_visit=False,
+        pulse=original.pulse,
+        spo2=original.spo2,
+        blood_pressure=original.blood_pressure,
+        sugar=original.sugar,
+        temperature=original.temperature,
+        respiratory_rate=original.respiratory_rate,
+        other_vitals=original.other_vitals,
+        chest_notes=original.chest_notes,
+        special_instructions=original.special_instructions,
+        follow_up=original.follow_up,
+    )
+    
+    # Copy tests ordered
+    new_prescription.tests_ordered.set(original.tests_ordered.all())
+    
+    # Copy medicines
+    for med in original.medicines.all():
+        PrescriptionMedicine.objects.create(
+            prescription=new_prescription,
+            medicine=med.medicine,
+            custom_medicine=med.custom_medicine,
+            dosage=med.dosage,
+            morning=med.morning,
+            afternoon=med.afternoon,
+            evening=med.evening,
+            night=med.night,
+            days=med.days,
+            instructions=med.instructions,
+        )
+    
+    messages.success(request, 'Prescription duplicated successfully. You can now edit it.')
+    return redirect('prescription_edit', pk=new_prescription.pk)
+
+
+# ============ Template Views ============
+
+@login_required
+def template_list(request):
+    """List all prescription templates"""
+    templates = PrescriptionTemplate.objects.filter(is_active=True)
+    return render(request, 'clinic/template_list.html', {'templates': templates})
+
+
+@login_required
+def template_create(request):
+    """Create a new prescription template"""
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        clinical_record = request.POST.get('clinical_record', '')
+        special_instructions = request.POST.get('special_instructions', '')
+        
+        # Get doctor if exists
+        doctor = None
+        if request.user.is_authenticated:
+            try:
+                doctor = request.user.doctor
+            except Doctor.DoesNotExist:
+                pass
+        
+        template = PrescriptionTemplate.objects.create(
+            name=name,
+            description=description,
+            doctor=doctor,
+            clinical_record=clinical_record,
+            special_instructions=special_instructions,
+        )
+        
+        # Add medicines from POST data
+        medicine_ids = request.POST.getlist('medicine_ids[]')
+        dosages = request.POST.getlist('dosages[]')
+        mornings = request.POST.getlist('mornings[]')
+        afternoons = request.POST.getlist('afternoons[]')
+        evenings = request.POST.getlist('evenings[]')
+        nights = request.POST.getlist('nights[]')
+        days_list = request.POST.getlist('days[]')
+        
+        for i, med_id in enumerate(medicine_ids):
+            if med_id:
+                TemplateMedicine.objects.create(
+                    template=template,
+                    medicine_id=int(med_id) if med_id else None,
+                    dosage=dosages[i] if i < len(dosages) else '',
+                    morning=str(i) in mornings,
+                    afternoon=str(i) in afternoons,
+                    evening=str(i) in evenings,
+                    night=str(i) in nights,
+                    days=int(days_list[i]) if i < len(days_list) and days_list[i] else 1,
+                )
+        
+        messages.success(request, f'Template "{template.name}" created successfully.')
+        return redirect('template_list')
+    
+    medicines = Medicine.objects.filter(is_active=True)
+    return render(request, 'clinic/template_form.html', {
+        'title': 'Create Template',
+        'medicines': medicines,
+    })
+
+
+@login_required
+def template_delete(request, pk):
+    """Delete a template"""
+    template = get_object_or_404(PrescriptionTemplate, pk=pk)
+    if request.method == 'POST':
+        template.delete()
+        messages.success(request, 'Template deleted successfully.')
+    return redirect('template_list')
 
 
 # ============ API Views ============
@@ -300,3 +686,30 @@ def api_patient_search(request):
         ).values('id', 'patient_id', 'name', 'gender', 'age')[:10]
         return JsonResponse(list(patients), safe=False)
     return JsonResponse([], safe=False)
+
+
+def api_template_data(request, pk):
+    """API endpoint to get template data for applying to prescription"""
+    template = get_object_or_404(PrescriptionTemplate, pk=pk)
+    
+    data = {
+        'clinical_record': template.clinical_record,
+        'special_instructions': template.special_instructions,
+        'medicines': []
+    }
+    
+    for med in template.medicines.all():
+        data['medicines'].append({
+            'medicine_id': med.medicine.id if med.medicine else None,
+            'medicine_name': med.get_medicine_name(),
+            'custom_medicine': med.custom_medicine,
+            'dosage': med.dosage,
+            'morning': med.morning,
+            'afternoon': med.afternoon,
+            'evening': med.evening,
+            'night': med.night,
+            'days': med.days,
+            'instructions': med.instructions,
+        })
+    
+    return JsonResponse(data)
