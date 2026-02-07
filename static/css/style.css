@@ -409,6 +409,66 @@ body {
     font-size: 0.85rem;
 }
 
+.btn-danger {
+    background: var(--danger-color);
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+.btn-danger-outline {
+    background: transparent;
+    border: 2px solid var(--danger-color);
+    color: var(--danger-color);
+}
+
+.btn-danger-outline:hover {
+    background: var(--danger-color);
+    color: #fff;
+}
+
+/* Navbar User Section */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 1rem;
+    padding-left: 1rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-name {
+    color: #a5b4fc;
+    font-size: 0.9rem;
+}
+
+.logout-link {
+    color: #fca5a5 !important;
+}
+
+.logout-link:hover {
+    color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+    font-size: 1.75rem;
+    color: #1a5f7a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* ============================================
    FORMS
    ============================================ */
@@ -1026,7 +1086,7 @@ textarea.form-control {
 
 .medicines-table .table-header {
     display: grid;
-    grid-template-columns: 2fr 1fr 120px 60px 1.5fr 40px;
+    grid-template-columns: 2fr 200px 180px 150px 40px;
     gap: 0.5rem;
     padding: 0.75rem;
     background: var(--bg-color);
@@ -1038,7 +1098,7 @@ textarea.form-control {
 
 .medicine-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 120px 60px 1.5fr 40px;
+    grid-template-columns: 2fr 200px 180px 150px 40px;
     gap: 0.5rem;
     padding: 0.75rem;
     border-bottom: 1px solid var(--border-color);
@@ -1057,8 +1117,32 @@ textarea.form-control {
     justify-content: center;
 }
 
-.col-days input {
-    width: 60px !important;
+.timing-input {
+    width: 50px !important;
+    height: 38px !important;
+    text-align: center !important;
+    font-size: 1.1rem !important;
+    padding: 0.25rem !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.col-duration {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+}
+
+.col-duration select {
+    width: 90px !important;
+    font-size: 0.85rem !important;
+    padding: 0.25rem !important;
+}
+
+.col-duration input {
+    width: 70px !important;
+    font-size: 0.85rem !important;
+    padding: 0.25rem !important;
 }
 
 .add-medicine-btn {
