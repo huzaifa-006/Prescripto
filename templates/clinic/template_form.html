@@ -1,0 +1,258 @@
+{% extends 'clinic/base.html' %}
+
+{% block title %}Create Template - Prescripto{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-file-medical"></i> {{ title }}</h1>
+    <a href="{% url 'template_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Templates
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="POST" id="template-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h3>Template Details</h3>
+
+            <div class="form-group">
+                <label for="name">Template Name *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g., Asthma Standard Treatment">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="2"
+                    placeholder="Brief description of when to use this template"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="clinical_record">Default Clinical Record</label>
+                <textarea id="clinical_record" name="clinical_record" rows="3"
+                    placeholder="Default diagnosis notes"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="special_instructions">Default Instructions</label>
+                <textarea id="special_instructions" name="special_instructions" rows="2"
+                    placeholder="Default special instructions"></textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Medicines</h3>
+            <p class="section-hint">Add medicines that will be pre-filled when using this template</p>
+
+            <div id="medicines-container">
+                <div class="medicine-row" data-index="0">
+                    <div class="form-row">
+                        <div class="form-group flex-2">
+                            <label>Medicine</label>
+                            <select name="medicine_ids[]" class="medicine-select">
+                                <option value="">Select medicine...</option>
+                                {% for med in medicines %}
+                                <option value="{{ med.id }}">{{ med }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Dosage</label>
+                            <input type="text" name="dosages[]" placeholder="e.g., 500mg">
+                        </div>
+                        <div class="form-group flex-1">
+                            <label>Days</label>
+                            <input type="number" name="days[]" value="1" min="1">
+                        </div>
+                    </div>
+                    <div class="form-row timing-row">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="mornings[]" value="0">
+                            <span>Morning</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="afternoons[]" value="0">
+                            <span>Afternoon</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="evenings[]" value="0">
+                            <span>Evening</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="nights[]" value="0">
+                            <span>Night</span>
+                        </label>
+                        <button type="button" class="btn btn-danger btn-sm remove-medicine">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-medicine" class="btn btn-secondary">
+                <i class="fas fa-plus"></i> Add Medicine
+            </button>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'template_list' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Template
+            </button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section h3 {
+        color: #1a5f7a;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e8f4f8;
+    }
+
+    .section-hint {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #1a5f7a;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .flex-1 {
+        flex: 1;
+    }
+
+    .flex-2 {
+        flex: 2;
+    }
+
+    .medicine-row {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .timing-row {
+        margin-top: 0.75rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+        width: auto;
+    }
+
+    .remove-medicine {
+        margin-left: auto;
+    }
+
+    #add-medicine {
+        margin-top: 0.5rem;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('medicines-container');
+        const addBtn = document.getElementById('add-medicine');
+        let medicineIndex = 1;
+
+        addBtn.addEventListener('click', function () {
+            const template = container.querySelector('.medicine-row').cloneNode(true);
+            template.dataset.index = medicineIndex;
+
+            // Clear values
+            template.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                if (input.name === 'days[]') {
+                    input.value = '1';
+                } else {
+                    input.value = '';
+                }
+            });
+            template.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            template.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.value = medicineIndex;
+            });
+
+            container.appendChild(template);
+            medicineIndex++;
+        });
+
+        container.addEventListener('click', function (e) {
+            if (e.target.closest('.remove-medicine')) {
+                const rows = container.querySelectorAll('.medicine-row');
+                if (rows.length > 1) {
+                    e.target.closest('.medicine-row').remove();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
