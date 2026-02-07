@@ -28,3 +28,28 @@ Thumbs.db
 # Secrets
 *.pem
 .env.local
+
+# Logs
+*.log
+logs/
+
+# media files
+media/
+
+# cache
+.pytest_cache/
+.coverage
+.mypy_cache/
+htmlcov/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Node (if using frontend tooling)
+node_modules/
+
+# Environment-specific
+.env.*.local
+local_settings.py
