@@ -22,9 +22,20 @@
                 Prescripto
             </a>
             <div class="nav-links">
-                <a href="{% url 'home' %}" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="nav-link"><i class="fas fa-chart-line"></i> Dashboard</a>
                 <a href="{% url 'patient_search' %}" class="nav-link"><i class="fas fa-search"></i> Search</a>
                 <a href="{% url 'medicine_list' %}" class="nav-link"><i class="fas fa-pills"></i> Medicines</a>
+                <a href="{% url 'template_list' %}" class="nav-link"><i class="fas fa-file-medical"></i> Templates</a>
+                <div class="nav-user">
+                    <span class="user-name"><i class="fas fa-user-md"></i> {{ user.username }}</span>
+                    <a href="{% url 'profile' %}" class="nav-link" title="Profile"><i class="fas fa-cog"></i></a>
+                    <a href="{% url 'logout' %}" class="nav-link logout-link" title="Logout"><i
+                            class="fas fa-sign-out-alt"></i></a>
+                </div>
+                {% else %}
+                <a href="{% url 'login' %}" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                {% endif %}
             </div>
         </div>
     </nav>
