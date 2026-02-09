@@ -633,10 +633,28 @@ def template_create(request):
         afternoons = request.POST.getlist('afternoons[]')
         evenings = request.POST.getlist('evenings[]')
         nights = request.POST.getlist('nights[]')
+        duration_choices = request.POST.getlist('duration_choices[]')
+        custom_durations = request.POST.getlist('custom_durations[]')
         days_list = request.POST.getlist('days[]')
         
         for i, med_id in enumerate(medicine_ids):
             if med_id:
+                duration_choice = duration_choices[i] if i < len(duration_choices) else ''
+                custom_duration = custom_durations[i].strip() if i < len(custom_durations) else ''
+                
+                # Determine days based on selection; fall back to numeric days input
+                days_value = 1
+                if duration_choice and duration_choice != 'custom':
+                    try:
+                        days_value = int(duration_choice)
+                    except ValueError:
+                        days_value = 1
+                else:
+                    try:
+                        days_value = int(days_list[i]) if i < len(days_list) and days_list[i] else 1
+                    except (ValueError, IndexError):
+                        days_value = 1
+                
                 TemplateMedicine.objects.create(
                     template=template,
                     medicine_id=int(med_id) if med_id else None,
@@ -645,7 +663,8 @@ def template_create(request):
                     afternoon=str(i) in afternoons,
                     evening=str(i) in evenings,
                     night=str(i) in nights,
-                    days=int(days_list[i]) if i < len(days_list) and days_list[i] else 1,
+                    days=days_value,
+                    custom_duration=custom_duration if duration_choice == 'custom' else '',
                 )
         
         messages.success(request, f'Template "{template.name}" created successfully.')
@@ -709,6 +728,7 @@ def api_template_data(request, pk):
             'evening': med.evening,
             'night': med.night,
             'days': med.days,
+            'custom_duration': med.custom_duration,
             'instructions': med.instructions,
         })
     
