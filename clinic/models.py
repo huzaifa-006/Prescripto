@@ -287,6 +287,7 @@ class TemplateMedicine(models.Model):
     evening = models.BooleanField(default=False)
     night = models.BooleanField(default=False)
     days = models.PositiveIntegerField(default=1)
+    custom_duration = models.CharField(max_length=50, blank=True, help_text="Custom duration text")
     instructions = models.CharField(max_length=200, blank=True)
     
     def get_medicine_name(self):
