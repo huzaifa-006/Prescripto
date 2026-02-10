@@ -34,7 +34,7 @@ class PrescriptionForm(forms.ModelForm):
     class Meta:
         model = Prescription
         fields = [
-            'date', 'time', 'clinical_record', 'dm', 'htn', 'ihd', 'tb', 'smoking',
+            'date', 'time', 'diagnosis', 'clinical_record', 'dm', 'htn', 'ihd', 'tb', 'smoking',
             'hep_b', 'hep_c', 'obesity', 'other_history',
             'is_first_visit', 'pulse', 'spo2', 'blood_pressure', 'sugar', 'temperature',
             'respiratory_rate', 'other_vitals', 'chest_notes', 'tests_ordered',
@@ -45,6 +45,7 @@ class PrescriptionForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
+            'diagnosis': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Primary diagnosis'}),
             'clinical_record': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Clinical notes and diagnosis'}),
             'dm': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'htn': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
@@ -86,6 +87,9 @@ class PrescriptionMedicineForm(forms.ModelForm):
         ('خالی پیٹ', 'خالی پیٹ (Empty stomach)'),
         ('کھانے کے ساتھ', 'کھانے کے ساتھ (With meal)'),
         ('ضرورت کے مطابق', 'ضرورت کے مطابق (As needed)'),
+        ('نیبولائزر کے ساتھ', 'نیبولائزر کے ساتھ (With nebulizer)'),
+        ('نیبولائزر کے بغیر', 'نیبولائزر کے بغیر (Without nebulizer)'),
+        ('دوائی کے ساتھ', 'دوائی کے ساتھ (With medicine)'),
         ('custom', 'Custom Instruction'),
     ]
 
@@ -101,6 +105,7 @@ class PrescriptionMedicineForm(forms.ModelForm):
         'with food': 'کھانے کے ساتھ',
         'as needed': 'ضرورت کے مطابق',
         'prn': 'ضرورت کے مطابق',
+
     }
 
     instruction_choice = forms.ChoiceField(
