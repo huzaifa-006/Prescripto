@@ -131,6 +131,7 @@ class Prescription(models.Model):
     time = models.TimeField(default=get_current_local_time, blank=True, null=True)
     
     # Clinical information
+    diagnosis = models.CharField(max_length=255, blank=True)
     clinical_record = models.TextField(blank=True, help_text="Diagnosis and clinical notes")
     
     # Medical history checkboxes
