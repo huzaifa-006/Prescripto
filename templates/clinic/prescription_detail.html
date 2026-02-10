@@ -20,7 +20,7 @@
                 </a>
             </div>
         </div>
-        
+
         <!-- Patient Info -->
         <div class="prescription-patient-card">
             <h3><i class="fas fa-user"></i> Patient Information</h3>
@@ -57,7 +57,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Clinical Record -->
         <div class="prescription-section">
             <h3><i class="fas fa-notes-medical"></i> Clinical Record</h3>
@@ -68,7 +68,7 @@
                 <p class="empty-text">No clinical notes recorded</p>
                 {% endif %}
             </div>
-            
+
             {% if prescription.dm or prescription.htn or prescription.ihd or prescription.tb or prescription.smoking %}
             <div class="medical-history-tags">
                 {% if prescription.dm %}<span class="tag">DM</span>{% endif %}
@@ -79,9 +79,9 @@
             </div>
             {% endif %}
         </div>
-        
+
         <!-- Vitals -->
-        {% if prescription.pulse or prescription.spo2 or prescription.chest_notes %}
+        {% if prescription.pulse or prescription.spo2 or prescription.blood_pressure or prescription.sugar or prescription.temperature or prescription.respiratory_rate or prescription.chest_notes or prescription.other_vitals %}
         <div class="prescription-section">
             <h3><i class="fas fa-heartbeat"></i> Vitals</h3>
             <div class="vitals-grid">
@@ -93,17 +93,44 @@
                 {% endif %}
                 {% if prescription.spo2 %}
                 <div class="vital-item">
-                    <span class="vital-label">SPO2</span>
+                    <span class="vital-label">SPO<sub>2</sub></span>
                     <span class="vital-value">{{ prescription.spo2 }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.blood_pressure %}
+                <div class="vital-item">
+                    <span class="vital-label">BP</span>
+                    <span class="vital-value">{{ prescription.blood_pressure }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.sugar %}
+                <div class="vital-item">
+                    <span class="vital-label">Sugar</span>
+                    <span class="vital-value">{{ prescription.sugar }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.temperature %}
+                <div class="vital-item">
+                    <span class="vital-label">Temperature</span>
+                    <span class="vital-value">{{ prescription.temperature }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.respiratory_rate %}
+                <div class="vital-item">
+                    <span class="vital-label">Respiratory Rate</span>
+                    <span class="vital-value">{{ prescription.respiratory_rate }}</span>
                 </div>
                 {% endif %}
             </div>
             {% if prescription.chest_notes %}
             <p class="chest-notes"><strong>Chest:</strong> {{ prescription.chest_notes }}</p>
             {% endif %}
+            {% if prescription.other_vitals %}
+            <p class="chest-notes"><strong>Other Vitals:</strong> {{ prescription.other_vitals|linebreaksbr }}</p>
+            {% endif %}
         </div>
         {% endif %}
-        
+
         <!-- Medicines -->
         <div class="prescription-section">
             <h3><i class="fas fa-prescription"></i> Rx - Medicines</h3>
@@ -125,8 +152,9 @@
                 </thead>
                 <tbody>
                     {% for med in prescription.medicines.all %}
+                    {% if med.medicine or med.custom_medicine %}
                     <tr>
-                        <td class="medicine-name">{{ med.medicine }}</td>
+                        <td class="medicine-name">{{ med.get_medicine_name }}</td>
                         <td>{{ med.dosage|default:"-" }}</td>
                         <td class="timing-cells">
                             <span class="{% if med.morning %}checked{% endif %}">{% if med.morning %}✓{% else %}-{% endif %}</span>
@@ -135,8 +163,9 @@
                             <span class="{% if med.night %}checked{% endif %}">{% if med.night %}✓{% else %}-{% endif %}</span>
                         </td>
                         <td>{{ med.days }} day(s)</td>
-                        <td>{{ med.instructions|default:"-" }}</td>
+                        <td>{{ med.get_instruction_display_text }}</td>
                     </tr>
+                    {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -144,7 +173,36 @@
             <p class="empty-text">No medicines prescribed</p>
             {% endif %}
         </div>
-        
+
+        <!-- Instructions -->
+        {% if prescription.instruction_avoid_food or prescription.instruction_no_smoking or prescription.instruction_gargles or prescription.instruction_warm_liquids or prescription.other_instructions  %}
+        <div class="prescription-section">
+            <h3><i class="fas fa-clipboard-list"></i> Instructions</h3>
+            <div class="instructions-content">
+                <ul style="margin: 0; padding-left: 20px;">
+                    {% if prescription.instruction_avoid_food %}
+                    <li>Avoid Citrus, Fried, Cold and Junk food items.</li>
+                    {% endif %}
+                    {% if prescription.instruction_no_smoking %}
+                    <li>Smoking, Cold drinks strongly prohibited.</li>
+                    {% endif %}
+                    {% if prescription.instruction_gargles %}
+                    <li>Gargles after any type of inhaler are mandatory.</li>
+                    {% endif %}
+                    {% if prescription.instruction_warm_liquids %}
+                    <li>Use warm liquids frequently.</li>
+                    {% endif %}
+                </ul>
+                {% if prescription.other_instructions %}
+                <div style="margin-top: 10px;">
+                    <strong>Other Instructions:</strong>
+                    {{ prescription.other_instructions|linebreaks }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Lab Tests -->
         {% if prescription.tests_ordered.exists %}
         <div class="prescription-section">
@@ -156,17 +214,27 @@
             </div>
         </div>
         {% endif %}
-        
-        <!-- Instructions -->
-        {% if prescription.special_instructions %}
+
+        <!-- Counseled in detail -->
+        {% if prescription.counseled_in_detail %}
         <div class="prescription-section">
-            <h3><i class="fas fa-clipboard-list"></i> Special Instructions</h3>
-            <div class="instructions-content">
-                {{ prescription.special_instructions|linebreaks }}
+            <div class="counseled-badge"
+                style="background: #27ae60; color: white; padding: 8px 15px; border-radius: 5px; display: inline-block;">
+                <i class="fas fa-check-circle"></i> Counseled in detail
             </div>
         </div>
         {% endif %}
-        
+
+        <!-- Rescue Rx -->
+        {% if prescription.rescue_rx_given %}
+        <div class="prescription-section">
+            <div class="rescue-rx-badge"
+                style="background: #e74c3c; color: white; padding: 8px 15px; border-radius: 5px; display: inline-block;">
+                <i class="fas fa-syringe"></i> Dose of Rescue Rx given with IV Steroid and Nebulization
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Follow-up -->
         {% if prescription.follow_up %}
         <div class="prescription-section">
@@ -174,7 +242,7 @@
             <p>{{ prescription.follow_up }}</p>
         </div>
         {% endif %}
-        
+
         <!-- Navigation -->
         <div class="detail-navigation">
             <a href="{% url 'patient_detail' prescription.patient.pk %}" class="btn btn-outline">
