@@ -47,45 +47,70 @@
 
             <div id="medicines-container">
                 <div class="medicine-row" data-index="0">
-                    <div class="form-row">
-                        <div class="form-group flex-2">
-                            <label>Medicine</label>
-                            <select name="medicine_ids[]" class="medicine-select">
-                                <option value="">Select medicine...</option>
-                                {% for med in medicines %}
-                                <option value="{{ med.id }}">{{ med }}</option>
-                                {% endfor %}
-                            </select>
+                    <div class="medicine-row-inner">
+                        <div class="form-row stacked">
+                            <div class="form-group flex-3">
+                                <label>Medicine</label>
+                                <select name="medicine_ids[]" class="medicine-select">
+                                    <option value="">Select medicine...</option>
+                                    {% for med in medicines %}
+                                    <option value="{{ med.id }}">{{ med }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group flex-1">
-                            <label>Dosage</label>
-                            <input type="text" name="dosages[]" placeholder="e.g., 500mg">
+                        <div class="form-row stacked">
+                            <div class="form-group flex-2">
+                                <label>Dosage</label>
+                                <input type="text" name="dosages[]" placeholder="e.g., 500mg">
+                            </div>
+                            <div class="form-group flex-2">
+                                <label>Duration</label>
+                                <select name="duration_choices[]" class="duration-select">
+                                    <option value="">Set duration...</option>
+                                    <option value="3">3 days</option>
+                                    <option value="5">5 days</option>
+                                    <option value="7">1 week</option>
+                                    <option value="10">10 days</option>
+                                    <option value="14">2 weeks</option>
+                                    <option value="21">3 weeks</option>
+                                    <option value="28">4 weeks (1 month)</option>
+                                    <option value="60">2 months</option>
+                                    <option value="custom">Custom</option>
+                                </select>
+                            </div>
+                            <div class="form-group flex-2 custom-duration-group" style="display: none;">
+                                <label>Custom Duration</label>
+                                <input type="text" name="custom_durations[]" placeholder="e.g., Taper over 10 days">
+                            </div>
+                            <div class="form-group flex-1">
+                                <label>Days</label>
+                                <input type="number" name="days[]" value="1" min="1">
+                            </div>
                         </div>
-                        <div class="form-group flex-1">
-                            <label>Days</label>
-                            <input type="number" name="days[]" value="1" min="1">
+                        <div class="timing-row">
+                            <div class="timing-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="mornings[]" value="0">
+                                    <span>Morning</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="afternoons[]" value="0">
+                                    <span>Afternoon</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="evenings[]" value="0">
+                                    <span>Evening</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="nights[]" value="0">
+                                    <span>Night</span>
+                                </label>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm remove-medicine">
+                                <i class="fas fa-times"></i>
+                            </button>
                         </div>
-                    </div>
-                    <div class="form-row timing-row">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="mornings[]" value="0">
-                            <span>Morning</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="afternoons[]" value="0">
-                            <span>Afternoon</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="evenings[]" value="0">
-                            <span>Evening</span>
-                        </label>
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="nights[]" value="0">
-                            <span>Night</span>
-                        </label>
-                        <button type="button" class="btn btn-danger btn-sm remove-medicine">
-                            <i class="fas fa-times"></i>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -165,36 +190,83 @@
         display: flex;
         gap: 1rem;
         align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .form-row.stacked .form-group {
+        margin-bottom: 0;
     }
 
     .flex-1 {
-        flex: 1;
+        flex: 1 1 160px;
     }
 
     .flex-2 {
-        flex: 2;
+        flex: 1 1 220px;
+    }
+
+    .flex-3 {
+        flex: 1 1 320px;
     }
 
     .medicine-row {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 12px;
+        background: #fdfefe;
+        padding: 1.1rem 1.2rem;
+        border-radius: 14px;
         margin-bottom: 1rem;
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid #1a5f7a;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    }
+
+    .medicine-row-inner {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .medicine-select {
+        min-height: 46px;
+        font-size: 1rem;
+    }
+
+    .duration-select {
+        width: 100%;
+        padding: 0.72rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+
+    .duration-select:focus {
+        border-color: #1a5f7a;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(26, 95, 122, 0.1);
     }
 
     .timing-row {
-        margin-top: 0.75rem;
         display: flex;
         gap: 1rem;
         align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        background: #f1f5f9;
+        border-radius: 12px;
+        padding: 10px 12px;
+    }
+
+    .timing-group {
+        display: flex;
+        gap: 12px;
         flex-wrap: wrap;
     }
 
     .checkbox-label {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
         cursor: pointer;
+        font-weight: 500;
     }
 
     .checkbox-label input[type="checkbox"] {
@@ -209,6 +281,23 @@
         margin-top: 0.5rem;
     }
 
+    /* Select2 sizing tweaks for this page */
+    .select2-container--default .select2-selection--single {
+        height: 46px;
+        padding: 8px 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 28px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px;
+        right: 10px;
+    }
+
     .form-actions {
         display: flex;
         justify-content: flex-end;
@@ -221,28 +310,24 @@
     document.addEventListener('DOMContentLoaded', function () {
         const container = document.getElementById('medicines-container');
         const addBtn = document.getElementById('add-medicine');
-        let medicineIndex = 1;
+        let medicineIndex = container ? container.querySelectorAll('.medicine-row').length : 0;
+
+        initSelect2(container);
+        bindDurationSelect(container);
+        reindexRows();
 
         addBtn.addEventListener('click', function () {
-            const template = container.querySelector('.medicine-row').cloneNode(true);
+            const baseRow = container.querySelector('.medicine-row');
+            if (!baseRow) return;
+
+            const template = baseRow.cloneNode(true);
             template.dataset.index = medicineIndex;
 
-            // Clear values
-            template.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
-                if (input.name === 'days[]') {
-                    input.value = '1';
-                } else {
-                    input.value = '';
-                }
-            });
-            template.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
-            template.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.checked = false;
-                cb.value = medicineIndex;
-            });
-
+            resetRow(template, medicineIndex);
             container.appendChild(template);
-            medicineIndex++;
+            initSelect2(template);
+            bindDurationSelect(template);
+            reindexRows();
         });
 
         container.addEventListener('click', function (e) {
@@ -250,9 +335,95 @@
                 const rows = container.querySelectorAll('.medicine-row');
                 if (rows.length > 1) {
                     e.target.closest('.medicine-row').remove();
+                    reindexRows();
                 }
             }
         });
+
+        function resetRow(row, idx) {
+            // Remove any lingering select2 markup inside the clone
+            row.querySelectorAll('.select2').forEach(el => el.remove());
+
+            row.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                if (input.name === 'days[]') {
+                    input.value = '1';
+                } else {
+                    input.value = '';
+                }
+            });
+
+            row.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+
+            const customDur = row.querySelector('input[name="custom_durations[]"]');
+            if (customDur) customDur.value = '';
+            const customGroup = row.querySelector('.custom-duration-group');
+            if (customGroup) customGroup.style.display = 'none';
+
+            row.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.value = idx;
+            });
+        }
+
+        function reindexRows() {
+            const rows = container.querySelectorAll('.medicine-row');
+            rows.forEach((row, idx) => {
+                row.dataset.index = idx;
+                row.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.value = idx;
+                });
+            });
+            medicineIndex = rows.length;
+        }
+
+        function initSelect2(scope = document) {
+            if (typeof $ === 'undefined' || !scope || !$.fn || !$.fn.select2) return;
+
+            $(scope).find('.medicine-select').each(function () {
+                if ($(this).data('select2')) {
+                    $(this).select2('destroy');
+                }
+                $(this).select2({
+                    placeholder: 'Search medicine...',
+                    allowClear: true,
+                    width: '100%'
+                });
+            });
+        }
+
+        function bindDurationSelect(scope = document) {
+            if (!scope || !scope.querySelectorAll) return;
+
+            const selects = scope.querySelectorAll('.duration-select');
+            selects.forEach(select => {
+                if (select.dataset.bound === '1') return;
+
+                select.addEventListener('change', function () {
+                    const daysInput = select.closest('.medicine-row')?.querySelector('input[name=\"days[]\"]');
+                    const customGroup = select.closest('.medicine-row')?.querySelector('.custom-duration-group');
+                    const customInput = select.closest('.medicine-row')?.querySelector('input[name=\"custom_durations[]\"]');
+                    if (!daysInput) return;
+
+                    const val = select.value;
+                    if (customGroup) customGroup.style.display = val === 'custom' ? 'block' : 'none';
+                    if (val !== 'custom' && customInput) customInput.value = '';
+
+                    if (val === 'custom') {
+                        if (customInput) customInput.focus();
+                        return;
+                    }
+
+                    if (!val) return;
+
+                    const num = parseInt(val, 10);
+                    if (!isNaN(num)) daysInput.value = num;
+                });
+
+                select.dataset.bound = '1';
+            });
+        }
     });
 </script>
 {% endblock %}
