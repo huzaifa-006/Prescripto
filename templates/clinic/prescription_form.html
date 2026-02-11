@@ -21,6 +21,31 @@
         <form method="post" class="prescription-form" id="prescriptionForm">
             {% csrf_token %}
 
+            {% if templates %}
+            <div class="template-loader">
+                <div class="template-loader-top">
+                    <label for="templateSelect"><i class="fas fa-file-medical"></i> Apply Template</label>
+                    <div class="template-loader-actions">
+                        <select id="templateSelect" class="form-control">
+                            <option value="">Select template...</option>
+                            {% for tmpl in templates %}
+                            <option value="{{ tmpl.id }}">{{ tmpl.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="button" class="btn btn-outline" id="applyTemplateBtn">
+                            <i class="fas fa-bolt"></i> Apply
+                        </button>
+                    </div>
+                </div>
+                <small class="text-muted">Prefills diagnosis, instructions, and medicines. Existing medicines will be replaced.</small>
+            </div>
+            {% else %}
+            <div class="template-loader empty">
+                <span>No templates yet.</span>
+                <a href="{% url 'template_create' %}" class="btn-link">Create one</a>
+            </div>
+            {% endif %}
+
             <div class="form-sections">
                 <!-- Clinical Information -->
                 <section class="form-section">
@@ -31,6 +56,10 @@
                             <label for="id_date">Date</label>
                             {{ form.date }}
                         </div>
+                        <div class="form-group">
+                            <label for="id_time">Time</label>
+                            {{ form.time }}
+                        </div>
                         <div class="form-group checkbox-inline">
                             <label class="checkbox-label">
                                 {{ form.is_first_visit }}
@@ -40,8 +69,13 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="id_diagnosis">Diagnosis</label>
+                        {{ form.diagnosis }}
+                    </div>
+
+                    <div class="form-group">
                         <label for="id_clinical_record">
-                            Clinical Record / Diagnosis
+                            Clinical Record
                             <button type="button" id="voiceBtn" class="btn-voice" title="Click to speak">
                                 <i class="fas fa-microphone"></i>
                             </button>
@@ -56,6 +90,13 @@
                         <label class="checkbox-label">{{ form.ihd }} IHD</label>
                         <label class="checkbox-label">{{ form.tb }} TB</label>
                         <label class="checkbox-label">{{ form.smoking }} Smoking</label>
+                        <label class="checkbox-label">{{ form.hep_b }} Hep-B</label>
+                        <label class="checkbox-label">{{ form.hep_c }} Hep-C</label>
+                        <label class="checkbox-label">{{ form.obesity }} Obesity</label>
+                    </div>
+                    <div class="form-group" style="margin-top: 10px;">
+                        <label for="id_other_history">Other Medical History</label>
+                        {{ form.other_history }}
                     </div>
                 </section>
 
@@ -68,13 +109,35 @@
                             {{ form.pulse }}
                         </div>
                         <div class="form-group">
-                            <label for="id_spo2">SPO2</label>
+                            <label for="id_spo2">SPO<sub>2</sub></label>
                             {{ form.spo2 }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_blood_pressure">BP</label>
+                            {{ form.blood_pressure }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="id_sugar">Sugar</label>
+                            {{ form.sugar }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_temperature">Temperature</label>
+                            {{ form.temperature }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_respiratory_rate">Respiratory Rate</label>
+                            {{ form.respiratory_rate }}
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="id_chest_notes">Chest Notes</label>
                         {{ form.chest_notes }}
+                    </div>
+                    <div class="form-group">
+                        <label for="id_other_vitals">Other Vitals</label>
+                        {{ form.other_vitals }}
                     </div>
                 </section>
 
@@ -85,17 +148,47 @@
                     <div class="medicines-table" id="medicinesTable">
                         <div class="table-header">
                             <span class="col-medicine">Medicine</span>
-                            <span class="col-dosage">Dosage</span>
                             <span class="col-timing">
                                 <span title="Morning">M</span>
                                 <span title="Afternoon">A</span>
                                 <span title="Evening">E</span>
                                 <span title="Night">N</span>
                             </span>
-                            <span class="col-days">Days</span>
+                            <span class="col-duration">Duration</span>
                             <span class="col-instructions">Instructions</span>
                             <span class="col-delete"></span>
                         </div>
+
+                        <template id="medicineRowTemplate">
+                            <div class="medicine-row" data-index="__prefix__">
+                                {{ formset.empty_form.id }}
+                                <div class="col-medicine">
+                                    {{ formset.empty_form.medicine }}
+                                    <span class="or-label">OR</span>
+                                    {{ formset.empty_form.custom_medicine }}
+                                </div>
+                                <div class="col-timing">
+                                    <label class="timing-check" title="Morning">{{ formset.empty_form.morning }}</label>
+                                    <label class="timing-check" title="Afternoon">{{ formset.empty_form.afternoon }}</label>
+                                    <label class="timing-check" title="Evening">{{ formset.empty_form.evening }}</label>
+                                    <label class="timing-check" title="Night">{{ formset.empty_form.night }}</label>
+                                </div>
+                                <div class="col-duration">
+                                    {{ formset.empty_form.duration_choice }}
+                                    {{ formset.empty_form.custom_duration }}
+                                </div>
+                                <div class="col-instructions">
+                                    {{ formset.empty_form.instruction_choice }}
+                                    {{ formset.empty_form.custom_instruction }}
+                                    {{ formset.empty_form.instructions }}
+                                </div>
+                                <div class="col-delete">
+                                    {% if formset.empty_form.DELETE %}
+                                    <label class="delete-check">{{ formset.empty_form.DELETE }}</label>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </template>
 
                         {{ formset.management_form }}
                         {% for medicine_form in formset %}
@@ -106,19 +199,19 @@
                                 <span class="or-label">OR</span>
                                 {{ medicine_form.custom_medicine }}
                             </div>
-                            <div class="col-dosage">
-                                {{ medicine_form.dosage }}
-                            </div>
                             <div class="col-timing">
                                 <label class="timing-check" title="Morning">{{ medicine_form.morning }}</label>
                                 <label class="timing-check" title="Afternoon">{{ medicine_form.afternoon }}</label>
                                 <label class="timing-check" title="Evening">{{ medicine_form.evening }}</label>
                                 <label class="timing-check" title="Night">{{ medicine_form.night }}</label>
                             </div>
-                            <div class="col-days">
-                                {{ medicine_form.days }}
+                            <div class="col-duration">
+                                {{ medicine_form.duration_choice }}
+                                {{ medicine_form.custom_duration }}
                             </div>
                             <div class="col-instructions">
+                                {{ medicine_form.instruction_choice }}
+                                {{ medicine_form.custom_instruction }}
                                 {{ medicine_form.instructions }}
                             </div>
                             <div class="col-delete">
@@ -135,25 +228,64 @@
                     </button>
                 </section>
 
-                <!-- Lab Tests -->
-                <section class="form-section">
-                    <h3><i class="fas fa-flask"></i> Lab Tests</h3>
-                    <div class="lab-tests-grid">
-                        {{ form.tests_ordered }}
-                    </div>
-                </section>
+                <!-- Two Column Layout for Instructions and Lab Tests -->
+                <div class="form-row" style="gap: 20px;">
+                    <!-- Instructions Section (Left) -->
+                    <section class="form-section" style="flex: 1;">
+                        <h3><i class="fas fa-clipboard-list"></i> Instructions</h3>
+                        <div class="instruction-checkboxes">
+                            <label class="checkbox-label instruction-item">
+                                {{ form.instruction_avoid_food }}
+                                <span>Avoid Citrus, Fried, Cold and Junk food items.</span>
+                            </label>
+                            <label class="checkbox-label instruction-item">
+                                {{ form.instruction_no_smoking }}
+                                <span>Smoking, Cold drinks strongly prohibited.</span>
+                            </label>
+                            <label class="checkbox-label instruction-item">
+                                {{ form.instruction_gargles }}
+                                <span>Gargles after any type of inhaler are mandatory.</span>
+                            </label>
+                            <label class="checkbox-label instruction-item">
+                                {{ form.instruction_warm_liquids }}
+                                <span>Use warm liquids frequently.</span>
+                            </label>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="id_other_instructions">Other Instructions</label>
+                            {{ form.other_instructions }}
+                        </div>
+                    </section>
 
-                <!-- Instructions -->
+                    <!-- Lab Tests Section (Right) -->
+                    <section class="form-section" style="flex: 1;">
+                        <h3><i class="fas fa-flask"></i> Lab Tests</h3>
+                        <div class="lab-tests-container">
+                            <label for="id_tests_ordered">Select Lab Tests</label>
+                            {{ form.tests_ordered }}
+                            <div class="selected-tests-display" id="selectedTestsDisplay">
+                                <!-- Selected tests will appear here as tags -->
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Additional Options -->
                 <section class="form-section">
-                    <h3><i class="fas fa-clipboard-list"></i> Instructions & Follow-up</h3>
-                    <div class="form-group">
-                        <label for="id_special_instructions">
-                            Special Instructions
-                            <button type="button" id="voiceBtnSpecial" class="btn-voice" title="Click to speak">
-                                <i class="fas fa-microphone"></i>
-                            </button>
-                        </label>
-                        {{ form.special_instructions }}
+                    <h3><i class="fas fa-cog"></i> Additional Options</h3>
+                    <div class="form-row">
+                        <div class="form-group checkbox-inline">
+                            <label class="checkbox-label">
+                                {{ form.counseled_in_detail }}
+                                <span>Counseled in detail</span>
+                            </label>
+                        </div>
+                        <div class="form-group checkbox-inline">
+                            <label class="checkbox-label">
+                                {{ form.rescue_rx_given }}
+                                <span>Rescue Rx given with IV Steroid and Nebulization</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="id_follow_up">Follow-up</label>
@@ -180,6 +312,9 @@
     // Initialize Select2 on medicine dropdowns
     $(document).ready(function () {
         initializeSelect2();
+        initializeLabTestsSelect();
+        initializeInstructionFields();
+        setupTemplateLoader();
     });
 
     function initializeSelect2() {
@@ -187,6 +322,96 @@
             placeholder: 'Search medicine...',
             allowClear: true,
             width: '100%'
+        });
+    }
+
+    function initializeLabTestsSelect() {
+        // Initialize Select2 for lab tests
+        $('.lab-tests-select').select2({
+            placeholder: 'Search and select lab tests...',
+            allowClear: true,
+            width: '100%',
+            closeOnSelect: false
+        });
+
+        // Update the tag display when selection changes
+        $('.lab-tests-select').on('change', function () {
+            updateSelectedTestsDisplay();
+        });
+
+        // Initialize display with any pre-selected tests
+        updateSelectedTestsDisplay();
+    }
+
+    function updateSelectedTestsDisplay() {
+        const select = document.getElementById('id_tests_ordered');
+        const display = document.getElementById('selectedTestsDisplay');
+
+        if (!select || !display) return;
+
+        display.innerHTML = '';
+
+        const selectedOptions = Array.from(select.selectedOptions);
+
+        if (selectedOptions.length === 0) {
+            display.innerHTML = '<span class="no-tests-selected">No tests selected</span>';
+            return;
+        }
+
+        selectedOptions.forEach(option => {
+            const tag = document.createElement('span');
+            tag.className = 'test-tag';
+            tag.innerHTML = `
+                ${option.text}
+                <button type="button" class="remove-tag" data-value="${option.value}">&times;</button>
+            `;
+            display.appendChild(tag);
+        });
+
+        // Add click handler for remove buttons
+        display.querySelectorAll('.remove-tag').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const value = this.getAttribute('data-value');
+                const option = select.querySelector(`option[value="${value}"]`);
+                if (option) {
+                    option.selected = false;
+                    $('.lab-tests-select').trigger('change');
+                }
+            });
+        });
+    }
+
+    function toggleCustomInstruction(row) {
+        const choiceField = row.querySelector('.instruction-choice-select');
+        const customField = row.querySelector('.custom-instruction-input');
+
+        if (!choiceField || !customField) return;
+
+        const shouldShowCustom = choiceField.value === 'custom';
+        customField.style.display = shouldShowCustom ? 'block' : 'none';
+
+        if (!shouldShowCustom) {
+            customField.value = '';
+        }
+    }
+
+    function initializeInstructionFields(scope = document) {
+        const rows = scope.classList && scope.classList.contains('medicine-row')
+            ? [scope]
+            : scope.querySelectorAll('.medicine-row');
+
+        rows.forEach(row => {
+            const choiceField = row.querySelector('.instruction-choice-select');
+            if (!choiceField) return;
+
+            if (!choiceField.dataset.instructionBound) {
+                choiceField.addEventListener('change', function () {
+                    toggleCustomInstruction(row);
+                });
+                choiceField.dataset.instructionBound = '1';
+            }
+
+            toggleCustomInstruction(row);
         });
     }
 
@@ -201,38 +426,208 @@
         newRow.className = 'medicine-row';
         newRow.dataset.index = formIndex;
 
-        // Clone the structure from an existing row
         const existingRow = container.querySelector('.medicine-row');
         if (existingRow) {
-            // Destroy Select2 before cloning
             $(existingRow).find('.medicine-select').select2('destroy');
-
-            newRow.innerHTML = existingRow.innerHTML.replace(/-\d+-/g, `-${formIndex}-`);
-
-            // Clear values in the new row
-            newRow.querySelectorAll('input, select').forEach(input => {
-                if (input.type === 'checkbox') {
-                    input.checked = false;
-                } else if (input.tagName === 'SELECT') {
-                    input.selectedIndex = 0;
-                } else if (input.type !== 'hidden') {
-                    input.value = input.name.includes('days') ? '1' : '';
-                }
-            });
-
-            // Clear the hidden id field for new forms
-            const idField = newRow.querySelector('input[name$="-id"]');
-            if (idField) {
-                idField.value = '';
-            }
-
-            // Reinitialize Select2 on all rows
-            container.appendChild(newRow);
-            initializeSelect2();
+            newRow.innerHTML = existingRow.innerHTML.replace(/-\\d+-/g, `-${formIndex}-`).replace(/__prefix__/g, formIndex);
+        } else {
+            const tmpl = document.getElementById('medicineRowTemplate');
+            if (!tmpl) return;
+            newRow.innerHTML = tmpl.innerHTML.replace(/__prefix__/g, formIndex);
         }
+
+        newRow.querySelectorAll('input, select').forEach(input => {
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            } else if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
+            } else if (input.type === 'hidden') {
+                if (input.name.includes('-instructions')) {
+                    input.value = '';
+                }
+            } else if (input.type !== 'hidden') {
+                input.value = input.name.includes('days') ? '1' : '';
+            }
+        });
+
+        const idField = newRow.querySelector('input[name$="-id"]');
+        if (idField) {
+            idField.value = '';
+        }
+
+        container.appendChild(newRow);
+        initializeSelect2();
+        initializeInstructionFields(newRow);
 
         formIndex++;
         totalForms.value = formIndex;
+    }
+
+    function setupTemplateLoader() {
+        const applyBtn = document.getElementById('applyTemplateBtn');
+        const select = document.getElementById('templateSelect');
+
+        if (!applyBtn || !select) return;
+
+        applyBtn.addEventListener('click', function () {
+            const templateId = select.value;
+            if (!templateId) {
+                alert('Select a template to apply.');
+                return;
+            }
+            applyTemplate(templateId);
+        });
+    }
+
+    function applyTemplate(templateId) {
+        fetch(`/api/templates/${templateId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.clinical_record !== undefined) {
+                    const clinical = document.getElementById('id_clinical_record');
+                    if (clinical) clinical.value = data.clinical_record || '';
+                }
+
+                if (data.special_instructions !== undefined) {
+                    const otherInstr = document.getElementById('id_other_instructions');
+                    if (otherInstr) otherInstr.value = data.special_instructions || '';
+                }
+
+                if (Array.isArray(data.medicines)) {
+                    fillMedicinesFromTemplate(data.medicines);
+                }
+            })
+            .catch(() => {
+                alert('Could not load template. Please try again.');
+            });
+    }
+
+    function fillMedicinesFromTemplate(medicines) {
+        const container = document.getElementById('medicinesTable');
+        const totalForms = document.getElementById('id_medicines-TOTAL_FORMS');
+        if (!container || !totalForms) return;
+
+        // Ensure enough rows exist
+        while (container.querySelectorAll('.medicine-row').length < medicines.length) {
+            addMedicineRow();
+        }
+
+        const rows = Array.from(container.querySelectorAll('.medicine-row'));
+
+        medicines.forEach((med, idx) => {
+            const row = rows[idx];
+            if (!row) return;
+
+            const deleteField = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteField) {
+                deleteField.checked = false;
+                deleteField.dispatchEvent(new Event('change'));
+            }
+
+            setRowValuesFromTemplate(row, med);
+        });
+
+        // Mark extra rows for deletion (useful in edit view) or clear them
+        for (let i = medicines.length; i < rows.length; i++) {
+            const row = rows[i];
+            clearRowValues(row);
+            const deleteField = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteField) {
+                deleteField.checked = true;
+                deleteField.dispatchEvent(new Event('change'));
+            }
+        }
+
+        initializeSelect2();
+        initializeInstructionFields();
+    }
+
+    function setRowValuesFromTemplate(row, med) {
+        const setVal = (selector, value) => {
+            const el = row.querySelector(selector);
+            if (el) el.value = value || '';
+            return el;
+        };
+
+        const medSelect = setVal('select[name$=\"-medicine\"]', med.medicine_id || '');
+        if (medSelect) {
+            $(medSelect).val(med.medicine_id || '').trigger('change');
+        }
+
+        setVal('input[name$=\"-custom_medicine\"]', med.custom_medicine);
+        setVal('input[name$=\"-dosage\"]', med.dosage);
+        setVal('input[name$=\"-morning\"]', med.morning ?? 0);
+        setVal('input[name$=\"-afternoon\"]', med.afternoon ?? 0);
+        setVal('input[name$=\"-evening\"]', med.evening ?? 0);
+        setVal('input[name$=\"-night\"]', med.night ?? 0);
+        // Duration handling
+        const durationSelect = row.querySelector('select[name$=\"-duration_choice\"]');
+        const customDurationInput = row.querySelector('input[name$=\"-custom_duration\"]');
+        const daysInput = row.querySelector('input[name$=\"-days\"]');
+
+        if (med.custom_duration) {
+            if (durationSelect) durationSelect.value = 'custom';
+            if (customDurationInput) customDurationInput.value = med.custom_duration;
+            if (daysInput) daysInput.value = med.days ?? '';
+        } else {
+            if (durationSelect) durationSelect.value = '';
+            if (customDurationInput) customDurationInput.value = '';
+            if (daysInput) daysInput.value = med.days ?? 1;
+        }
+
+        applyInstructionValue(row, med.instructions);
+    }
+
+    function applyInstructionValue(row, instruction) {
+        const normalized = (instruction || '').trim();
+        const choiceField = row.querySelector('.instruction-choice-select');
+        const customField = row.querySelector('.custom-instruction-input');
+        const hiddenField = row.querySelector('input[name$=\"-instructions\"]');
+
+        if (hiddenField) hiddenField.value = normalized;
+
+        if (!choiceField) return;
+
+        const presetValues = Array.from(choiceField.options).map(opt => opt.value).filter(Boolean);
+        if (normalized && presetValues.includes(normalized)) {
+            choiceField.value = normalized;
+            if (customField) customField.value = '';
+        } else if (normalized) {
+            choiceField.value = 'custom';
+            if (customField) customField.value = normalized;
+        } else {
+            choiceField.value = '';
+            if (customField) customField.value = '';
+        }
+
+        choiceField.dispatchEvent(new Event('change'));
+    }
+
+    function clearRowValues(row) {
+        ['select[name$=\"-medicine\"]',
+         'input[name$=\"-custom_medicine\"]',
+         'input[name$=\"-dosage\"]',
+         'input[name$=\"-morning\"]',
+         'input[name$=\"-afternoon\"]',
+         'input[name$=\"-evening\"]',
+         'input[name$=\"-night\"]',
+         'input[name$=\"-days\"]',
+         'select[name$=\"-duration_choice\"]',
+         'input[name$=\"-custom_duration\"]',
+         'input[name$=\"-instructions\"]',
+         '.instruction-choice-select',
+         '.custom-instruction-input'
+        ].forEach(selector => {
+            const el = row.querySelector(selector);
+            if (!el) return;
+            if (el.type === 'checkbox') {
+                el.checked = false;
+            } else if (el.tagName === 'SELECT') {
+                el.value = '';
+            } else {
+                el.value = '';
+            }
+        });
     }
     // Voice to Text Feature
     function setupVoiceInput(btnId, inputId) {
@@ -282,7 +677,6 @@
 
     // Initialize Voice Features
     setupVoiceInput('voiceBtn', 'id_clinical_record');
-    setupVoiceInput('voiceBtnSpecial', 'id_special_instructions');
 </script>
 <style>
     .btn-voice {
@@ -316,6 +710,138 @@
         100% {
             transform: scale(1);
         }
+    }
+
+    .template-loader {
+        background: #f8f9fb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+    }
+
+    .template-loader-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .template-loader-actions {
+        display: flex;
+        gap: 10px;
+        min-width: 320px;
+        flex: 1;
+    }
+
+    .template-loader .form-control {
+        flex: 1;
+    }
+
+    .template-loader small {
+        display: block;
+        margin-top: 8px;
+        color: #6b7280;
+    }
+
+    .template-loader.empty {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: #6b7280;
+    }
+
+    .template-loader .btn-link {
+        color: #2563eb;
+        text-decoration: underline;
+    }
+
+    .instruction-checkboxes {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .instruction-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .instruction-item span {
+        line-height: 1.4;
+    }
+
+    .col-instructions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .instruction-choice-select,
+    .custom-instruction-input {
+        width: 100% !important;
+    }
+
+    /* Lab Tests Dropdown Styling */
+    .lab-tests-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .lab-tests-container label {
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+    }
+
+    .selected-tests-display {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+        min-height: 30px;
+    }
+
+    .test-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: white;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .test-tag .remove-tag {
+        background: rgba(255, 255, 255, 0.3);
+        border: none;
+        color: white;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        line-height: 1;
+        transition: background 0.2s;
+    }
+
+    .test-tag .remove-tag:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .no-tests-selected {
+        color: var(--text-light);
+        font-style: italic;
+        padding: 5px;
     }
 </style>
 {% endblock %}
