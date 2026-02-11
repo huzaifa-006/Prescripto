@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,406 +7,901 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prescription - {{ prescription.patient.name }}</title>
     <style>
+        :root {
+            --urdu-font-family: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", serif;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 5mm;
+        }
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.4;
-            padding: 10mm;
-            max-width: 210mm;
-            margin: 0 auto;
-        }
-
-        .prescription-slip {
-            border: 2px solid #000;
-            padding: 5mm;
-        }
-
-        /* Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid #000;
-            padding-bottom: 3mm;
-            margin-bottom: 3mm;
-        }
-
-        .doctor-info {
-            flex: 1;
-        }
-
-        .doctor-name {
-            font-size: 16pt;
-            font-weight: bold;
-            color: #1a5f7a;
-        }
-
-        .doctor-title {
-            font-size: 9pt;
-            margin-top: 1mm;
-        }
-
-        .doctor-credentials {
-            font-size: 8pt;
-            color: #555;
-        }
-
-        .hospital-info {
-            text-align: right;
-            flex: 1;
-        }
-
-        .hospital-name {
-            font-size: 14pt;
-            font-weight: bold;
-            color: #c0392b;
-        }
-
-        .hospital-tagline {
-            font-size: 8pt;
-            font-style: italic;
-        }
-
-        /* Patient Info */
-        .patient-info-row {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #ccc;
-            padding: 2mm 0;
-            font-size: 11pt;
-        }
-
-        .patient-info-row span {
-            display: inline-block;
-        }
-
-        .patient-name {
-            font-weight: bold;
-        }
-
-        .field-label {
-            color: #666;
-        }
-
-        /* Main Content */
-        .main-content {
-            display: flex;
-            margin-top: 3mm;
-            min-height: 150mm;
-        }
-
-        .left-column {
-            flex: 0 0 30%;
-            border-right: 1px solid #ccc;
-            padding-right: 3mm;
-        }
-
-        .right-column {
-            flex: 0 0 70%;
-            padding-left: 3mm;
-        }
-
-        .section-title {
+            font-family: "Times New Roman", Times, serif;
             font-size: 10pt;
-            font-weight: bold;
-            text-decoration: underline;
-            margin-bottom: 2mm;
+            line-height: 1.2;
+            background: #f4f4f4;
+            color: #000;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
-        .clinical-record {
-            font-size: 10pt;
-            line-height: 1.5;
+        .page-wrap {
+            width: 200mm;
+            margin: 5mm auto;
         }
 
-        /* Rx Section */
-        .rx-header {
-            font-size: 24pt;
-            font-weight: bold;
-            font-family: serif;
-            margin-bottom: 2mm;
-        }
-
-        .medicines-table {
-            width: 100%;
-            font-size: 10pt;
-            border-collapse: collapse;
-        }
-
-        .medicines-table th,
-        .medicines-table td {
-            padding: 1.5mm;
-            text-align: left;
-            border-bottom: 1px dotted #ccc;
-        }
-
-        .medicines-table th {
-            font-size: 8pt;
-            color: #666;
-            border-bottom: 1px solid #999;
-        }
-
-        .timing-header,
-        .timing-cell {
-            text-align: center;
-            width: 20px;
-        }
-
-        .timing-cell .check {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        /* Medical History Badges */
-        .medical-history {
-            margin-top: 3mm;
-            font-size: 9pt;
-        }
-
-        .history-badge {
-            display: inline-block;
-            padding: 1mm 2mm;
-            margin: 1mm;
-            border: 1px solid #999;
-            border-radius: 2mm;
-            font-size: 8pt;
-        }
-
-        /* Instructions */
-        .instructions-section {
-            margin-top: 5mm;
-            padding-top: 3mm;
-            border-top: 1px solid #ccc;
-        }
-
-        .instructions-list {
-            font-size: 9pt;
-            padding-left: 5mm;
-        }
-
-        /* Lab Tests */
-        .lab-tests-section {
-            margin-top: 3mm;
-            padding: 2mm;
-            border: 1px solid #ccc;
-        }
-
-        .lab-tests-section h4 {
-            font-size: 9pt;
-            margin-bottom: 2mm;
-        }
-
-        .test-item {
-            font-size: 9pt;
-            display: inline-block;
-            margin-right: 3mm;
-        }
-
-        .test-item input[type="checkbox"] {
-            margin-right: 1mm;
-        }
-
-        /* Footer */
-        .footer {
-            margin-top: 5mm;
-            padding-top: 3mm;
-            border-top: 1px solid #ccc;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        .follow-up {
-            font-size: 10pt;
-        }
-
-        .signature-area {
-            text-align: right;
-        }
-
-        .signature-line {
-            width: 50mm;
-            border-top: 1px solid #000;
-            margin-top: 10mm;
-            padding-top: 1mm;
-            font-size: 9pt;
-        }
-
-        /* Print Styles */
-        @media print {
-            body {
-                padding: 0;
-            }
-
-            .no-print {
-                display: none !important;
-            }
-        }
-
-        /* Print Button */
         .print-button {
             position: fixed;
             top: 10px;
             right: 10px;
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
+            z-index: 1000;
+            border: 1px solid #1f4f7d;
+            background: #1f4f7d;
+            color: #fff;
+            border-radius: 4px;
+            padding: 8px 14px;
+            font-size: 13px;
             cursor: pointer;
-            font-size: 14px;
         }
 
         .print-button:hover {
-            background: #2980b9;
+            background: #173a5b;
+        }
+
+        .sheet {
+            width: 200mm;
+            height: 287mm;
+            border: 1px solid #000;
+            background: #fff;
+            padding: 2.2mm 2.4mm 2mm;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            display: grid;
+            grid-template-columns: 1.15fr 0.8fr 1.15fr;
+            gap: 2mm;
+            border-bottom: 1px solid #000;
+            padding-bottom: 1.3mm;
+            min-height: 40mm;
+        }
+
+        .doctor-panel {
+            font-size: 10.5pt;
+            line-height: 1.26;
+        }
+
+        .doctor-title {
+            font-size: 11.7pt;
+            margin-bottom: 0.8mm;
+            margin-top: 1.7mm;
+        }
+
+        .doctor-name {
+            font-size: 17pt;
+            font-weight: 700;
+            color: #8a2f2f;
+            margin-bottom: 0.9mm;
+        }
+
+        .center-panel {
+            text-align: center;
+            padding-top: 0.5mm;
+        }
+
+        .center-logo {
+            width: auto;
+            height: 38mm;
+            margin-bottom: none;
+        }
+
+        .hospital-name {
+            font-size: 16pt;
+            font-weight: 700;
+            color: #8a2f2f;
+            line-height: 1;
+            margin-bottom: 0.7mm;
+        }
+
+        .hospital-tagline {
+            font-size: 10pt;
+            font-weight: 700;
+            margin-bottom: 0.8mm;
+        }
+
+        .hospital-address {
+            font-size: 9.5pt;
+            line-height: 1.2;
+        }
+
+        .urdu-panel {
+            direction: rtl;
+            text-align: right;
+            font-family: var(--urdu-font-family);
+            line-height: 1.45;
+            padding-top: 1.6mm;
+        }
+
+        .urdu-title {
+            font-size: 10pt;
+            margin-bottom: 0.3mm;
+        }
+
+        .urdu-name {
+            font-size: 18.5pt;
+            font-weight: 700;
+            color: #8a2f2f;
+            margin-bottom: 0.3mm;
+            margin-top: 0.9mm;
+            margin-right: 5pt;
+        }
+
+        .urdu-line {
+            font-size: 11.5pt;
+            padding: 3.4px;
+        }
+        .urdu-line1 {
+            font-size: 12pt;
+            font-style: italic;
+        }
+        
+        .patient-row {
+            display: grid;
+            grid-template-columns: 2.8fr 1.3fr 1fr 1.2fr 1.4fr 1fr;
+            gap: 2mm;
+            align-items: center;
+            border-bottom: 1px solid #000;
+            padding: 2.2mm 0 2mm;
+            min-height: 10.5mm;
+        }
+
+        .meta-field {
+            display: flex;
+            align-items: baseline;
+            gap: 1mm;
+            white-space: nowrap;
+            overflow: hidden;
+            font-size: 11.5pt;
+        }
+
+        .meta-label {
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .meta-value {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .clinical-row {
+            display: grid;
+            grid-template-columns: auto 1.2fr 1.2fr auto;
+            align-items: center;
+            gap: 2mm;
+            border-bottom: 1px solid #000;
+            padding: 2.2mm 0 2mm;
+            min-height: 10.5mm;
+            font-size: 11pt;
+        }
+
+        .clinical-label {
+            font-weight: 700;
+        }
+
+        .diag-text {
+            overflow: hidden;
+            white-space: normal;
+            text-overflow: ellipsis;
+        }
+
+        .history-text {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            text-align: center;
+            justify-self: right;
+        }
+
+        .visit-type {
+            font-weight: 500;
+            white-space: nowrap;
+            text-align: right;
+            font-size: 11.5pt;
+        }
+
+        .content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 27.5% 72.5%;
+            min-height: 0;
+            position: relative;
+        }
+
+        .left-col {
+            padding: 1.3mm 1.5mm 1.1mm 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            flex: 1;
+        }
+
+        /* Draw vertical divider only for the content area so it doesn't overlap footer */
+        .content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 27.5%;
+            width: 1px;
+            background: #000;
+        }
+
+        .diagnosis {
+            min-height: 60mm;
+            font-size: 11.5pt;
+            line-height: 1.18;
+            overflow-wrap: anywhere;
+        }
+
+        .left-middle {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            padding-top: 4.8mm;
+        }
+
+        .vitals {
+            width: 100%;
+            font-size: 11pt;
+            line-height: 1.3;
+            margin-top: 55mm;
+        }
+
+        .vital-row {
+            margin-bottom: 0.8mm;
+        }
+
+        .vital-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .vitals .label {
+            font-weight: 700;
+        }
+
+        .chest-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 1mm;
+        }
+
+        .chest-text {
+            flex: 1;
+            line-height: 1.24;
+            overflow-wrap: anywhere;
+        }
+
+        .follow-up-footer {
+            display: grid;
+            grid-template-columns: 27.5% 72.5%;
+            padding: 1.3mm 1.5mm 0 0;
+            border-right: none;
+            align-items: flex-start;
+            position: relative;
+            /* margin-bottom: 1mm; */
+        }
+
+        .follow-up-left {
+            font-size: 11.5pt;
+            line-height: 1.22;
+            margin-bottom: 0mm;
+            grid-column: 1;
+        }
+
+        .follow-up-left .title {
+            font-weight: 700;
+        }
+
+        .rescue-note {
+            margin-top: 0.5mm;
+            font-weight: 550;
+            font-size: 11.5pt;
+            line-height: 1.16;
+            white-space: nowrap;
+            margin-top: 6px;
+        }
+
+        .right-col {
+            padding-left: 1.4mm;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .rx-title {
+            font-size: 26pt;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5mm;
+            margin-top: 3mm;
+        }
+
+        .med-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 11pt;
+        }
+
+        .med-table th,
+        .med-table td {
+            padding: 1.1mm 1mm;
+            vertical-align: top;
+        }
+
+        .med-table th {
+            border-bottom: 1px solid #000;
+            font-weight: 700;
+            text-align: center;
+            font-size: 9.8pt;
+        }
+
+        .med-table th.medicine-col {
+            text-align: left;
+            width: 46%;
+            font-size: 16pt;
+        }
+
+        .med-table th.time-col {
+            width: 6%;
+            
+        }
+
+        .med-table th.duration-col {
+            width: 12%;
+            font-size: 11pt;
+        }
+
+        .med-table th.instructions-col {
+            width: 18%;
+            text-align: left;
+            font-size: 11pt;
+        }
+
+        .med-table td {
+            border-bottom: 1px dotted #c7c7c7;
+            font-size: 12.5pt;
+        }
+
+        .med-table td.time-cell,
+        .med-table td.duration-cell {
+            text-align: center;
+            border-left: 1px solid #d0d0d0;
+            font-weight: 450;
+        }
+
+        .med-table td.instructions-cell {
+            border-left: 1px solid #d0d0d0;
+            font-size: 9.2pt;
+            line-height: 1.2;
+            overflow-wrap: anywhere;
+        }
+
+        .urdu-sub {
+            display: block;
+            font-family: var(--urdu-font-family);
+            font-size: 8pt;
+            line-height: 1.1;
+            font-weight: 700;
+            margin-top: 0.6mm;
+            margin-bottom: 1mm;
+        }
+
+        .urdu-font {
+            font-family: var(--urdu-font-family);
+        }
+
+        .lab-tests {
+            width: 100%;
+            min-width: 75mm;
+            max-width: 125mm;
+            font-size: 10.5pt;
+            line-height: 1.26;
+            border: 1px solid #000;
+            padding: 1.4mm 2mm 1.6mm;
+            margin: 0 5px 2mm auto;
+            box-sizing: border-box;
+        }
+
+        .lab-title {
+            font-weight: 700;
+            margin-bottom: 1mm;
+        }
+
+        .lab-item {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+        }
+
+        /* Instructions styling handled in right column and bottom strip */
+        .instructions {
+            display: flex;
+            gap: 6mm;
+            align-items: flex-start;
+            width: 100%;
+            justify-content: space-between;
+            margin-top: 4mm;
+        }
+
+        .instructions-top {
+            margin-top: 0;
+            padding-right: 3mm;
+            margin-left: 0;
+        }
+
+        .instructions-left {
+            flex: 1 1 60%;
+            max-width: 100%;
+            font-size: 11pt;
+            line-height: 1.2;
+            margin-top: 0;
+        }
+
+        .instructions-title {
+            font-weight: 700;
+            margin-bottom: 0.6mm;
+        }
+
+        .instructions-left ol {
+            margin: 0;
+            padding-left: 5.2mm;
+        }
+
+        .instructions-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2.2mm;
+            min-width: 32%;
+            max-width: 50%;
+            margin-left: auto;
+            flex: 0 0 auto;
+            box-sizing: border-box;
+            margin-right: 0;
+        }
+
+        .instructions-right .counseled {
+            margin-top: 0;
+            align-self: flex-end;
+        }
+
+        .instructions-right .lab-tests {
+            width: 90%;
+            min-width: 50mm;
+            max-width: 100mm;
+            margin: 0 0 1mm auto;
+            align-self: flex-end;
+            flex: 0 0 auto;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .instructions-bottom-row {
+            display: grid;
+            grid-template-columns: 27.5% 72.5%;
+            position: relative;
+            margin: 0 0 3mm;
+            padding: 0 6mm 0 3mm;
+            align-items: flex-start;
+        }
+
+        /* draw divider only for the instructions band, stopping before follow-up */
+        .instructions-bottom-row::before {
+            content: "";
+            position: absolute;
+            top: -1mm;
+            bottom: -2mm;
+            left: 27.5%;
+            width: 1px;
+            background: #000;
+        }
+
+        .instructions-row-content {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 6mm;
+        }
+
+        /* push the instructions text down to align with lab tests */
+        .instructions-bottom-row .instructions-left {
+            margin-top: 8mm;
+        }
+
+        .counseled {
+            font-size: 11pt;
+            font-weight: 550;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: right;
+            gap: 1.3mm;
+            align-self: flex-end;
+            /* margin-bottom: 40px; */
+        }
+
+.footer {
+            border-top: 1px solid #000;
+            padding: 2mm 0 0;
+            margin-top: 3px;
+            display: flex;
+            justify-content: space-between;
+            gap: 4mm;
+            min-height: 22mm;
+        }
+
+        .note {
+            flex: 1;
+            font-size: 10.5pt;
+            line-height: 1.16;
+            margin-top: 2mm;
+        }
+
+        .note strong {
+            font-size: 12pt;
+        }
+
+        .contact {
+            text-align: right;
+            direction: rtl;
+            font-family: var(--urdu-font-family);
+        }
+
+        .contact-address {
+            color: #b64040;
+            font-size: 14pt;
+            line-height: 1.2;
+            margin-bottom: 1.2mm;
+            margin-top: 1mm;
+        }
+
+        .contact-phone {
+            direction: ltr;
+            text-align: right;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 12pt;
+            font-weight: 550;
+            white-space: nowrap;
+        }
+
+        /* Footer-right container for Instructions + Counseled */
+        .footer-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            width: 38%;
+            box-sizing: border-box;
+            padding-right: 0;
+        }
+
+        .instructions-footer {
+            width: 100%;
+            text-align: left; /* instructions left-aligned inside footer-right */
+            font-size: 10.5pt;
+            line-height: 1.16;
+        }
+
+        .instructions-footer .instructions-title {
+            font-weight: 700;
+            margin-bottom: 2mm;
+        }
+
+        .footer-right .counseled {
+            margin-top: 4mm;
+            margin-right: 5mm; /* 5mm from right edge */
+        }
+
+        @media print {
+            body {
+                background: #fff;
+            }
+
+            .page-wrap {
+                margin: 0;
+                width: auto;
+            }
+
+            .print-button,
+            .no-print {
+                display: none !important;
+            }
+        }
+        .d-details {
+            font-size: 11.5pt;
+        }
+        .d-details1 {
+            font-size: 11pt;
         }
     </style>
 </head>
 
 <body>
-    <button class="print-button no-print" onclick="window.print()">
-        🖨️ Print Prescription
-    </button>
+    <button class="print-button no-print" onclick="window.print()">Print Prescription</button>
 
-    <div class="prescription-slip">
-        <!-- Header -->
-        <div class="header">
-            <div class="doctor-info">
-                <div class="doctor-name">Dr. M. Mudassir Shafiq</div>
-                <div class="doctor-title">Assistant Professor</div>
-                <div class="doctor-credentials">
-                    M.B.B.S, F.C.P.S (Pulmonology), CHPE, PGC-LSM<br>
-                    Consultant Chest Physician (Bronchoscopist)<br>
-                    Expert in Asthma / Allergy / Chest Issues<br>
-                    Sleep, Obesity & Smoking Related Breathing Disorders
+    <div class="page-wrap">
+        <div class="sheet">
+            <div class="header">
+                <div class="doctor-panel">
+                    <div class="doctor-title">Assistant Professor</div>
+                    <div class="doctor-name">Dr. M. Mudassir Shafiq</div>
+                    <div class="d-details">M.B.B.S, F.C.P.S (Pulmonology), <br> CHPE, PGC-LSM</div>
+                    <div class="d-details1">Consultant Chest Physician (Bronchoscopist)</div>
+                    <div class="d-details1">Expert in Asthma, Allergy, and Chest Issues</div>
+                    <div>Sleep, Obesity &amp; Smoking Related Breathing Disorders</div>
+                </div>
+
+                <div class="center-panel">
+                    <img src="{% static 'images/logo.png' %}" alt="Rahim Hospital Logo" class="center-logo">
+                    <!-- <div class="hospital-name">Rahim Hospital</div>
+                    <div class="hospital-tagline">Because Your Health Matters</div>
+                    <div class="hospital-address">Hameed Khan Road</div>
+                    <div class="hospital-address">Commetti Mohalla, Rawalpindi</div> -->
+                </div>
+
+                <div class="urdu-panel">
+                    <!-- <div class="urdu-title">اسسٹنٹ پروفیسر</div> -->
+                    <div class="urdu-name">Rahim Hospital</div>
+                    <div class="urdu-line1">Because Your Health Matters</div>
+                    <div class="urdu-line">K-237, Dar ul Azim, Hameed Khan<br> Road, Commetti Mohalla, Rawalpindi</div>
+                    <div class="contact-phone">051 - 59 50 128, 0318 - 5420060</div>
                 </div>
             </div>
 
-            <div style="flex: 0 0 auto; margin: 0 5mm; display: flex; align-items: center;">
-                <img src="/static/images/logo.png" alt="Logo" style="height: 25mm; width: auto;">
+            <div class="patient-row">
+                <div class="meta-field">
+                    <span class="meta-label">Name:</span>
+                    <span class="meta-value">{{ prescription.patient.name }}</span>
+                </div>
+                <div class="meta-field">
+                    <span class="meta-label">Gender:</span>
+                    <span class="meta-value">{{ prescription.patient.get_gender_display|first }}</span>
+                </div>
+                <div class="meta-field">
+                    <span class="meta-label">Age:</span>
+                    <span class="meta-value">{{ prescription.patient.age|default:"" }}</span>
+                </div>
+                <div class="meta-field">
+                    <span class="meta-label">Weight:</span>
+                    <span class="meta-value">{{ prescription.patient.weight|default:"" }}</span>
+                </div>
+                <div class="meta-field">
+                    <span class="meta-label">Date:</span>
+                    <span class="meta-value">{{ prescription.date|date:"d / m / y" }}</span>
+                </div>
+                <div class="meta-field">
+                    <span class="meta-label">Time:</span>
+                    <span class="meta-value">{% if prescription.time %}{{ prescription.time|time:"H:i" }}{% endif %}</span>
+                </div>
             </div>
 
-            <div class="hospital-info">
-                <div class="hospital-name">Rahim Hospital</div>
-                <div class="hospital-tagline">Because Your Health Matters</div>
-                <div style="font-size: 8pt; margin-top: 2mm;">K-237, Dar ul Azim, Hameed Khan Road<br>Commetti Mohalla, Rawalpindi</div>
-                <div style="font-size: 8pt; margin-top: 1mm; font-weight: bold;">Timing: 9:00 AM to 9:00 PM (24/7)</div>
+            <div class="clinical-row">
+                <span class="clinical-label">△</span>
+                <span class="diag-text">{% if prescription.diagnosis %}{{ prescription.diagnosis }}{% endif %}</span>
+                <span class="history-text">
+                    {% if prescription.dm %}/ DM{% endif %}
+                    {% if prescription.htn %} / HTN{% endif %}
+                    {% if prescription.ihd %} / IHD{% endif %}
+                    {% if prescription.tb %} / TB{% endif %}
+                    {% if prescription.smoking %} / Smoking{% endif %}
+                    {% if prescription.hep_b %} / Hep-B{% endif %}
+                    {% if prescription.hep_c %} / Hep-C{% endif %}
+                    {% if prescription.obesity %} / Obesity{% endif %}
+                    {% if prescription.other_history %} / {{ prescription.other_history }}{% endif %}
+                </span>
             </div>
-        </div>
+                            <span class="visit-type">{% if prescription.is_first_visit %}1st Visit{% else %}F.u{% endif %}</span>
 
-        <!-- Patient Info -->
-        <div class="patient-info-row">
-            <span><span class="field-label">Pt's Name:</span> <span class="patient-name">{{ prescription.patient.name }}</span></span>
-            <span><span class="field-label">Gender:</span> {{ prescription.patient.get_gender_display }}</span>
-            <span><span class="field-label">Age:</span> {{ prescription.patient.age|default:"" }}</span>
-            <span><span class="field-label">Weight:</span> {{ prescription.patient.weight|default:"" }}</span>
-            <span><span class="field-label">Date:</span> {{ prescription.date|date:"d/m/y" }}</span>
-        </div>
+            <div class="content">
+                <div class="left-col">
+                    <div class="diagnosis">
+                                        <span class="clinical-label">Clinical Record: <br><br></span>
 
-        <div class="patient-info-row">
-            <span><span class="field-label">Patient ID:</span> <strong>{{ prescription.patient.patient_id }}</strong></span>
-            <span>
-                {% if prescription.dm %}DM{% endif %}
-                {% if prescription.htn %}/ HTN{% endif %}
-                {% if prescription.ihd %}/ IHD{% endif %}
-                {% if prescription.tb %}/ TB{% endif %}
-                {% if prescription.smoking %}/ Smoking{% endif %}
-            </span>
-            <span>
-                {% if prescription.is_first_visit %}1st Visit{% else %}Follow-up{% endif %}
-            </span>
-        </div>
+                        {% if prescription.clinical_record %}
+                            {{ prescription.clinical_record|linebreaksbr }}
+                        {% endif %}
+                    </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Left Column - Clinical Record -->
-            <div class="left-column">
-                <div class="section-title">Clinical Record:</div>
-                <div class="clinical-record">
-                    {{ prescription.clinical_record|linebreaks }}
-                </div>
-
-                {% if prescription.pulse or prescription.spo2 %}
-                <div style="margin-top: 10mm;">
-                    {% if prescription.pulse %}
-                    <div><strong>Pulse:</strong> {{ prescription.pulse }}</div>
-                    {% endif %}
-                    {% if prescription.spo2 %}
-                    <div><strong>SPO2:</strong> {{ prescription.spo2 }}</div>
-                    {% endif %}
-                </div>
-                {% endif %}
-
-                {% if prescription.chest_notes %}
-                <div style="margin-top: 5mm;">
-                    <strong>Chest:</strong> {{ prescription.chest_notes }}
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Right Column - Rx -->
-            <div class="right-column">
-                <div class="rx-header">℞</div>
-
-                {% if prescription.medicines.exists %}
-                <table class="medicines-table">
-                    <thead>
-                        <tr>
-                            <th>Medicine</th>
-                            <th class="timing-header">M</th>
-                            <th class="timing-header">A</th>
-                            <th class="timing-header">E</th>
-                            <th class="timing-header">N</th>
-                            <th>Days</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for med in prescription.medicines.all %}
-                        <tr>
-                            <td>{{ med.get_medicine_name }}{% if med.dosage %} - {{ med.dosage }}{% endif %}</td>
-                            <td class="timing-cell">{% if med.morning %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td class="timing-cell">{% if med.afternoon %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td class="timing-cell">{% if med.evening %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td class="timing-cell">{% if med.night %}<span class="check">✓</span>{% else %}-{% endif %}</td>
-                            <td>{{ med.days }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% endif %}
-
-                {% if prescription.special_instructions %}
-                <div class="instructions-section">
-                    <div class="section-title">Instructions:</div>
-                    <div class="instructions-list">
-                        {{ prescription.special_instructions|linebreaks }}
+                    <div class="left-middle">
+                        <div class="vitals">
+                            {% if prescription.pulse %}
+                            <div class="vital-row"><span class="label">Pulse:</span> {{ prescription.pulse }}</div>
+                            {% endif %}
+                            {% if prescription.spo2 %}
+                            <div class="vital-row"><span class="label">SPO<sub>2</sub>:</span> {{ prescription.spo2 }}</div>
+                            {% endif %}
+                            {% if prescription.blood_pressure %}
+                            <div class="vital-row"><span class="label">BP:</span> {{ prescription.blood_pressure }}</div>
+                            {% endif %}
+                            {% if prescription.sugar %}
+                            <div class="vital-row"><span class="label">Sugar:</span> {{ prescription.sugar }}</div>
+                            {% endif %}
+                            {% if prescription.temperature %}
+                            <div class="vital-row"><span class="label">Temp:</span> {{ prescription.temperature }}</div>
+                            {% endif %}
+                            {% if prescription.respiratory_rate %}
+                            <div class="vital-row"><span class="label">RR:</span> {{ prescription.respiratory_rate }}</div>
+                            {% endif %}
+                            {% if prescription.chest_notes %}
+                            <div class="vital-row chest-row">
+                                <span class="label">Chest:</span>
+                                <span class="chest-text">{{ prescription.chest_notes }}</span>
+                            </div>
+                            {% endif %}
+                            {% if prescription.other_vitals %}
+                            <div class="vital-row chest-row">
+                                <span class="label">Other:</span>
+                                <span class="chest-text">{{ prescription.other_vitals|linebreaksbr }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                {% endif %}
-            </div>
-        </div>
 
-        <!-- Lab Tests -->
-        {% if prescription.tests_ordered.exists %}
-        <div class="lab-tests-section">
-            <h4>Lab Tests Ordered:</h4>
-            {% for test in prescription.tests_ordered.all %}
-            <span class="test-item">☑ {{ test }}</span>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-        <!-- Footer -->
-        <div class="footer">
-            <div class="disclaimer" style="text-align: left; max-width: 60%; font-size: 8pt; color: #555;">
-                <strong>Note:</strong> This Prescription is advised on the basis of current symptoms. Disease pattern may change in hours by nature, In case of emergency, Visit nearby
+                <div class="right-col">
+                    <div class="rx-title">℞</div>
+                    <table class="med-table">
+                        <thead>
+                            <tr>
+                                <th class="medicine-col"></th>
+                                <th class="time-col">M<span class="urdu-sub">صبح</span></th>
+                                <th class="time-col">A<span class="urdu-sub">دوپہر</span></th>
+                                <th class="time-col">E<span class="urdu-sub">شام</span></th>
+                                <th class="time-col">N<span class="urdu-sub">رات</span></th>
+                                <th class="duration-col">Duration<span class="urdu-sub">مدت</span></th>
+                                <th class="instructions-col">Instructions<span class="urdu-sub">ہدایات</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for med in prescription.medicines.all %}
+                            {% if med.medicine or med.custom_medicine %}
+                            <tr>
+                                <td>{{ med.get_medicine_name }}{% if med.dosage %} {{ med.dosage }}{% endif %}</td>
+                                <td class="time-cell">{% if med.morning %}{{ med.morning }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.afternoon %}{{ med.afternoon }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.evening %}{{ med.evening }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.night %}{{ med.night }}{% else %}-{% endif %}</td>
+                                <td class="duration-cell">
+                                    {% if med.duration_choice == '1week' %}
+                                        <span class="urdu-font">1 ہفتہ</span>
+                                    {% elif med.duration_choice == '2weeks' %}
+                                        <span class="urdu-font">2 ہفتے</span>
+                                    {% elif med.duration_choice == '1month' %}
+                                        <span class="urdu-font">1 ماہ</span>
+                                    {% elif med.duration_choice == '2months' %}
+                                        <span class="urdu-font">2 ماہ</span>
+                                    {% elif med.duration_choice == 'custom' and med.custom_duration %}
+                                        <span class="urdu-font">{{ med.custom_duration }}</span>
+                                    {% elif med.days %}
+                                        <span class="urdu-font">{{ med.days }} دن</span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="instructions-cell"><span class="urdu-font">{{ med.get_instruction_display_text }}</span></td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td>&nbsp;</td>
+                                <td class="time-cell">-</td>
+                                <td class="time-cell">-</td>
+                                <td class="time-cell">-</td>
+                                <td class="time-cell">-</td>
+                                <td class="duration-cell">-</td>
+                                <td class="instructions-cell">-</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                </div>
             </div>
-            <div class="follow-up" style="text-align: right;">
-                <strong>Follow up:</strong> {{ prescription.follow_up|default:"_________________" }}
+
+            <div class="instructions instructions-bottom-row">
+                <div aria-hidden="true"></div>
+                <div class="instructions-row-content">
+                    <div class="instructions-left">
+                        <!-- <div class="instructions-title">Instructions:</div>
+                        <ol>
+                            {% if prescription.instruction_avoid_food %}
+                            <li>Avoid Citrus, Fried, Cold and Junk food items.</li>
+                            {% endif %}
+                            {% if prescription.instruction_no_smoking %}
+                            <li>Smoking, Cold drinks strongly prohibited.</li>
+                            {% endif %}
+                            {% if prescription.instruction_gargles %}
+                            <li>Gargles after any type of inhaler are mandatory.</li>
+                            {% endif %}
+                            {% if prescription.instruction_warm_liquids %}
+                            <li>Use Warm liquids frequently.</li>
+                            {% endif %}
+                            {% if prescription.other_instructions %}
+                            <li>{{ prescription.other_instructions }}</li>
+                            {% endif %}
+                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.other_instructions %}
+                            <li>&nbsp;</li>
+                            {% endif %}
+                        </ol> -->
+                    </div>
+                    <div class="instructions-right">
+                        {% if prescription.tests_ordered.exists %}
+                        <div class="lab-tests">
+                            <div class="lab-title">Lab Tests</div>
+                            {% for test in prescription.tests_ordered.all %}
+                            <div class="lab-item">☑ {{ test.name }}</div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <div class="counseled">
+                            <span>{% if prescription.counseled_in_detail %}☑{% else %}☐{% endif %}</span>
+                            <span>Counseled in detail</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="follow-up-footer">
+                <div class="follow-up-left">
+                    <div><span class="title">Follow up:</span> {{ prescription.follow_up|default:"Visit after 1 month" }}</div>
+                    {% if prescription.rescue_rx_given %}
+                    <div class="rescue-note">Dose of Rescue Rx given with IV Steroid and Nebulization</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="footer">
+                <div class="note">
+                    <strong>Note:</strong> This Prescription is advised on the basis of current symptoms. <br>Disease
+                    pattern may change in hours by nature. In case of emergency, <br>Visit nearby hospital.
+                </div>
+                <div class="footer-right">
+                    <div class="instructions-footer">
+                        <div class="instructions-title">Instructions:</div>
+                        <ol>
+                            {% if prescription.instruction_avoid_food %}
+                            <li>Avoid Citrus, Fried, Cold and Junk food items.</li>
+                            {% endif %}
+                            {% if prescription.instruction_no_smoking %}
+                            <li>Smoking, Cold drinks strongly prohibited.</li>
+                            {% endif %}
+                            {% if prescription.instruction_gargles %}
+                            <li>Gargles after any type of inhaler are mandatory.</li>
+                            {% endif %}
+                            {% if prescription.instruction_warm_liquids %}
+                            <li>Use Warm liquids frequently.</li>
+                            {% endif %}
+                            {% if prescription.other_instructions %}
+                            <li>{{ prescription.other_instructions }}</li>
+                            {% endif %}
+                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.other_instructions %}
+                            <li>&nbsp;</li>
+                            {% endif %}
+                        </ol>
+                    </div>
+                    <!-- <div class="counseled">
+                        <span>{% if prescription.counseled_in_detail %}☑{% else %}☐{% endif %}</span>
+                        <span>Counseled in detail</span>
+                    </div> -->
+                </div>
             </div>
         </div>
     </div>
