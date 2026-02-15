@@ -69,12 +69,48 @@ COMMON_DIAGNOSES = [
 
 
 def get_recent_diagnoses(limit=20):
-    """Return up to `limit` recent unique diagnoses for quick selection."""
-    diagnoses = Prescription.objects.exclude(diagnosis__isnull=True).exclude(diagnosis__exact='')\
-        .order_by('-updated_at').values_list('diagnosis', flat=True)
-
+    """Return up to `limit` recent unique diagnoses plus common diagnoses for quick selection."""
+    # Common diagnoses list
+    common_diagnoses = [
+        'Acute Respiratory Infection',
+        'Allergic Rhinitis',
+        'Asthma',
+        'Bronchitis',
+        'Bronchiectasis',
+        'COPD',
+        'Cough - Acute',
+        'Cough - Chronic',
+        'Diabetes Mellitus Type 2',
+        'Dyspepsia',
+        'Fever',
+        'Gastroesophageal Reflux Disease',
+        'Headache',
+        'Hypertension',
+        'Influenza',
+        'Laryngitis',
+        'Migraine',
+        'Pharyngitis',
+        'Pneumonia',
+        'Pulmonary Embolism',
+        'Sinusitis',
+        'Tuberculosis',
+        'Upper Respiratory Tract Infection',
+        'Viral Infection',
+        'Wheeze',
+    ]
+    
     seen = set()
     unique_diagnoses = []
+    
+    # Add common diagnoses first
+    for diag in common_diagnoses:
+        key = diag.lower()
+        seen.add(key)
+        unique_diagnoses.append(diag)
+    
+    # Then add recent diagnoses from database
+    diagnoses = Prescription.objects.exclude(diagnosis__isnull=True).exclude(diagnosis__exact='')\
+        .order_by('-updated_at').values_list('diagnosis', flat=True)
 
     for diag in diagnoses:
         normalized = diag.strip()
@@ -91,7 +127,7 @@ def get_recent_diagnoses(limit=20):
         if len(unique_diagnoses) >= limit:
             break
 
-    return unique_diagnoses
+    return unique_diagnoses[:limit]
 
 
 def get_diagnosis_options():
