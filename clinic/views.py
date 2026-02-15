@@ -120,7 +120,6 @@ def get_recent_diagnoses(limit=20):
         'Secondary ILD',
         'Sarcoidosis',
         'CTD-ILD',
-        
         'Hypersensitivity Pneumonitis',
         'Vasculitis - Unspecified',
         'GPA',
