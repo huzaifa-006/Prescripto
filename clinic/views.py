@@ -112,7 +112,6 @@ def get_recent_diagnoses(limit=20):
         'Tuberculosis - Pulmonary',
         'Upper Airway Cough Syndrome',
         'Post Viral Cough',
-        ''
         'Upper Respiratory Tract Infection',
         'ILD - Unspecified',
         'Fibrotic NSIP',
