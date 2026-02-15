@@ -45,8 +45,8 @@ class PrescriptionForm(forms.ModelForm):
         widgets = {
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
-            # list attribute wired to datalist in template for suggestions while keeping free text
-            'diagnosis': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Primary diagnosis', 'list': 'diagnosis-list'}),
+            # Stored as comma-separated string; UI handled via Select2 tags in template
+            'diagnosis': forms.HiddenInput(),
             'clinical_record': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Clinical notes and diagnosis'}),
             'dm': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'htn': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
