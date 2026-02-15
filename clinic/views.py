@@ -16,6 +16,104 @@ from .forms import (
 )
 
 
+# ============ Helper Utilities ============
+
+# Curated list of common diagnoses for quick selection
+COMMON_DIAGNOSES = [
+    "Upper Respiratory Tract Infection (URTI)",
+    "Lower Respiratory Tract Infection (LRTI)",
+    "Asthma Exacerbation",
+    "Chronic Obstructive Pulmonary Disease (COPD)",
+    "Pneumonia",
+    "Tuberculosis (TB)",
+    "Acute Bronchitis",
+    "Allergic Rhinitis",
+    "Sinusitis",
+    "Otitis Media",
+    "Gastroenteritis",
+    "Peptic Ulcer Disease (PUD)",
+    "Gastroesophageal Reflux Disease (GERD)",
+    "Urinary Tract Infection (UTI)",
+    "Kidney Stone (Renal Colic)",
+    "Hypertension",
+    "Diabetes Mellitus",
+    "Ischemic Heart Disease (IHD)",
+    "Congestive Heart Failure (CHF)",
+    "Migraine",
+    "Tension Headache",
+    "Anxiety Disorder",
+    "Depressive Episode",
+    "Anemia",
+    "Hypothyroidism",
+    "Vitamin D Deficiency",
+    "COVID-19",
+    "Dengue Fever",
+    "Malaria",
+    "Typhoid Fever",
+    "Chickenpox",
+    "Dermatitis",
+    "Psoriasis",
+    "Low Back Pain",
+    "Sciatica",
+    "Osteoarthritis",
+    "Rheumatoid Arthritis",
+    "Gout",
+    "Mechanical Neck Pain",
+    "Viral Fever",
+    "Food Poisoning",
+    "Dehydration",
+    "Otitis Externa",
+    "Conjunctivitis",
+    "Streptococcal Pharyngitis",
+]
+
+
+def get_recent_diagnoses(limit=20):
+    """Return up to `limit` recent unique diagnoses for quick selection."""
+    diagnoses = Prescription.objects.exclude(diagnosis__isnull=True).exclude(diagnosis__exact='')\
+        .order_by('-updated_at').values_list('diagnosis', flat=True)
+
+    seen = set()
+    unique_diagnoses = []
+
+    for diag in diagnoses:
+        normalized = diag.strip()
+        if not normalized:
+            continue
+
+        key = normalized.lower()
+        if key in seen:
+            continue
+
+        seen.add(key)
+        unique_diagnoses.append(normalized)
+
+        if len(unique_diagnoses) >= limit:
+            break
+
+    return unique_diagnoses
+
+
+def get_diagnosis_options():
+    """Return curated diagnoses merged with recent unique ones, no duplicates."""
+    seen = set()
+    options = []
+
+    def add_diag(diag):
+        key = diag.lower().strip()
+        if key and key not in seen:
+            seen.add(key)
+            options.append(diag.strip())
+
+    for diag in COMMON_DIAGNOSES:
+        add_diag(diag)
+
+    for diag in get_recent_diagnoses():
+        add_diag(diag)
+
+    return options
+
+
 # ============ Authentication Views ============
 
 def login_view(request):
@@ -474,6 +572,7 @@ def prescription_create(request, patient_id):
         'medicines': medicines,
         'lab_tests': lab_tests,
         'templates': templates,
+        'diagnosis_options': get_diagnosis_options(),
         'title': 'New Prescription',
     })
 
@@ -523,6 +622,7 @@ def prescription_edit(request, pk):
         'medicines': medicines,
         'lab_tests': lab_tests,
         'templates': templates,
+        'diagnosis_options': get_diagnosis_options(),
         'title': 'Edit Prescription',
     })
 
