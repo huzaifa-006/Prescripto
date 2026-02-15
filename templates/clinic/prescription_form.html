@@ -69,25 +69,14 @@
                     </div>
 
                     <div class="form-group diagnosis-wrapper">
-                        <label for="id_diagnosis">Diagnosis</label>
+                        <label for="diagnosisSelect">Diagnosis</label>
                         {{ form.diagnosis }}
-                        <datalist id="diagnosis-list">
+                        <select id="diagnosisSelect" class="form-control diagnosis-multi" multiple="multiple">
                             {% for diag in diagnosis_options %}
-                            <option value="{{ diag }}"></option>
+                            <option value="{{ diag }}">{{ diag }}</option>
                             {% endfor %}
-                        </datalist>
-                        <div class="diagnosis-select-row">
-                            <select id="diagnosisDropdown" class="form-control">
-                                <option value="">— Select common diagnosis —</option>
-                                {% for diag in diagnosis_options %}
-                                <option value="{{ diag }}">{{ diag }}</option>
-                                {% endfor %}
-                            </select>
-                            <button type="button" class="btn btn-outline" id="clearDiagnosisBtn" title="Clear diagnosis field">
-                                <i class="fas fa-eraser"></i>
-                            </button>
-                        </div>
-                        <small class="text-muted">Pick a common/recent diagnosis, or type and add any custom entry.</small>
+                        </select>
+                        <small class="text-muted">Select multiple or type to add custom diagnoses (press Enter).</small>
                     </div>
 
                     <div class="form-group">
@@ -332,7 +321,7 @@
         initializeLabTestsSelect();
         initializeInstructionFields();
         setupTemplateLoader();
-        setupDiagnosisDropdown();
+        setupDiagnosisMulti();
     });
 
     function initializeSelect2() {
@@ -693,26 +682,41 @@
         });
     }
 
-    function setupDiagnosisDropdown() {
-        const select = document.getElementById('diagnosisDropdown');
-        const input = document.getElementById('id_diagnosis');
-        const clearBtn = document.getElementById('clearDiagnosisBtn');
+    function setupDiagnosisMulti() {
+        const select = $('#diagnosisSelect');
+        const hidden = $('#id_diagnosis');
 
-        if (!select || !input) return;
+        if (!select.length || !hidden.length) return;
 
-        select.addEventListener('change', function () {
-            if (this.value) {
-                input.value = this.value;
+        // Preload existing values from hidden field (comma-separated)
+        const initial = (hidden.val() || '')
+            .split(',')
+            .map(v => v.trim())
+            .filter(Boolean);
+
+        initial.forEach(val => {
+            if (!select.find(`option[value=\"${val.replace(/\"/g, '\\\"')}\"]`).length) {
+                const newOption = new Option(val, val, true, true);
+                select.append(newOption);
             }
         });
 
-        if (clearBtn) {
-            clearBtn.addEventListener('click', function () {
-                input.value = '';
-                select.value = '';
-                input.focus();
-            });
-        }
+        select.val(initial);
+
+        select.select2({
+            tags: true,
+            placeholder: 'Select or type diagnoses',
+            width: '100%',
+            tokenSeparators: [',']
+        });
+
+        select.on('change', function () {
+            const values = $(this).val() || [];
+            hidden.val(values.join(', '));
+        });
+
+        // Sync initial state
+        select.trigger('change');
     }
 
     // Initialize Voice Features
@@ -895,12 +899,9 @@
         flex: 1;
     }
 
-    .diagnosis-wrapper #clearDiagnosisBtn {
-        padding: 0 10px;
-        height: 38px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+    .diagnosis-wrapper .select2-container {
+        width: 100% !important;
+        margin-top: 6px;
     }
 </style>
 {% endblock %}
