@@ -68,14 +68,31 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group diagnosis-wrapper">
                         <label for="id_diagnosis">Diagnosis</label>
                         {{ form.diagnosis }}
+                        <datalist id="diagnosis-list">
+                            {% for diag in diagnosis_options %}
+                            <option value="{{ diag }}"></option>
+                            {% endfor %}
+                        </datalist>
+                        <div class="diagnosis-select-row">
+                            <select id="diagnosisDropdown" class="form-control">
+                                <option value="">— Select common diagnosis —</option>
+                                {% for diag in diagnosis_options %}
+                                <option value="{{ diag }}">{{ diag }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="button" class="btn btn-outline" id="clearDiagnosisBtn" title="Clear diagnosis field">
+                                <i class="fas fa-eraser"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">Pick a common/recent diagnosis, or type and add any custom entry.</small>
                     </div>
 
                     <div class="form-group">
                         <label for="id_clinical_record">
-                            Clinical Record
+                            Clinical Summary
                             <button type="button" id="voiceBtn" class="btn-voice" title="Click to speak">
                                 <i class="fas fa-microphone"></i>
                             </button>
@@ -315,6 +332,7 @@
         initializeLabTestsSelect();
         initializeInstructionFields();
         setupTemplateLoader();
+        setupDiagnosisDropdown();
     });
 
     function initializeSelect2() {
@@ -675,6 +693,28 @@
         });
     }
 
+    function setupDiagnosisDropdown() {
+        const select = document.getElementById('diagnosisDropdown');
+        const input = document.getElementById('id_diagnosis');
+        const clearBtn = document.getElementById('clearDiagnosisBtn');
+
+        if (!select || !input) return;
+
+        select.addEventListener('change', function () {
+            if (this.value) {
+                input.value = this.value;
+            }
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                input.value = '';
+                select.value = '';
+                input.focus();
+            });
+        }
+    }
+
     // Initialize Voice Features
     setupVoiceInput('voiceBtn', 'id_clinical_record');
 </script>
@@ -842,6 +882,25 @@
         color: var(--text-light);
         font-style: italic;
         padding: 5px;
+    }
+
+    .diagnosis-wrapper .diagnosis-select-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+    }
+
+    .diagnosis-wrapper #diagnosisDropdown {
+        flex: 1;
+    }
+
+    .diagnosis-wrapper #clearDiagnosisBtn {
+        padding: 0 10px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 </style>
 {% endblock %}
