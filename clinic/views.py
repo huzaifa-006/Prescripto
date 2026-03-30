@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q, Count
+from django.db.models import Q, Count, ProtectedError
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -589,6 +589,23 @@ def medicine_edit(request, pk):
     else:
         form = MedicineForm(instance=medicine)
     return render(request, 'clinic/medicine_form.html', {'form': form, 'title': 'Edit Medicine', 'medicine': medicine})
+
+
+@login_required
+def medicine_delete(request, pk):
+    """Permanently delete a medicine"""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+
+    medicine = get_object_or_404(Medicine, pk=pk)
+
+    try:
+        medicine.delete()
+        messages.success(request, f'Medicine "{medicine}" deleted permanently.')
+    except ProtectedError:
+        messages.error(request, 'Cannot delete this medicine because it is used in existing prescriptions.')
+
+    return redirect('medicine_list')
 
 
 # ============ Prescription Views ============
