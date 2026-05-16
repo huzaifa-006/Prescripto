@@ -5,23 +5,25 @@ metadata:
   labels:
     app: prescripto
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: prescripto
-  replicas: 1
+
   template:
     metadata:
       labels:
         app: prescripto
     spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
-      - name: prescripto
-        image: huzaifa5/prescripto:v1
-        ports:
-        - containerPort: 8000
-        env:
-        - name: DEBUG
-          value: "False"
-        - name: SECRET_KEY
-          value: "mysecretkey"
-  
+        - name: prescripto
+          image: huzaifa5/prescripto:latest
+          ports:
+            - containerPort: 8000
+          env: 
+            - name: DEBUG
+              value: "false"
+            - name: SECRET_KEY
+              value: "mysecretkey"

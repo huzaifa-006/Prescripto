@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: prescripto-service
+  name: prescripto-serice
   labels:
     app: prescripto
 spec:
   selector:
-    app: prescripto  
+    app: prescripto
   ports:
-    - port: 8000
+    - port: 80
       targetPort: 8000
   type: LoadBalancer
