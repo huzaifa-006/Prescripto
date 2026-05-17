@@ -1,11 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: prescripto-deployment
   labels:
     app: prescripto
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: prescripto
@@ -14,16 +17,20 @@ spec:
     metadata:
       labels:
         app: prescripto
+
     spec:
-      imagePullSecrets:
-        - name: dockerhub-secret
       containers:
-        - name: prescripto
-          image: huzaifa5/prescripto:latest
-          ports:
-            - containerPort: 8000
-          env: 
-            - name: DEBUG
-              value: "false"
-            - name: SECRET_KEY
-              value: "mysecretkey"
+      - name: prescripto
+
+        image: prescripto
+        imagePullPolicy: Never
+
+        ports:
+        - containerPort: 8000
+
+        env:
+        - name: DEBUG
+          value: "false"
+
+        - name: SECRET_KEY
+          value: "mysecretkey"
