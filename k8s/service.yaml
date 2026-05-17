@@ -5,7 +5,7 @@ metadata:
   name: prescripto-service
 
 spec:
-  type: NodePort
+  type: LoadBalancer
 
   selector:
     app: prescripto
