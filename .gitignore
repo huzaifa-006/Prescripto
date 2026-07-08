@@ -1,55 +1,72 @@
-# Byte-compiled / optimized / DLL files
+# -----------------------------
+# Python
+# -----------------------------
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Virtual environment
+# -----------------------------
+# Virtual Environments
+# -----------------------------
 venv/
 env/
-.env
+.venv/
+venc/
 
-# Database
-*.sqlite3
+# -----------------------------
+# Django
+# -----------------------------
 db.sqlite3
+*.sqlite3
 
-# Static files (collected)
+# -----------------------------
+# Static Files
+# -----------------------------
 staticfiles/
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Secrets
-*.pem
-.env.local
-
+# -----------------------------
 # Logs
+# -----------------------------
 *.log
-logs/
 
-# media files
-media/
+# -----------------------------
+# Environment Variables
+# -----------------------------
+.env
 
-# cache
+# -----------------------------
+# macOS
+# -----------------------------
+.DS_Store
+
+# -----------------------------
+# VS Code
+# -----------------------------
+.vscode/
+
+# -----------------------------
+# PyCharm
+# -----------------------------
+.idea/
+
+# -----------------------------
+# Terraform
+# -----------------------------
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+
+# -----------------------------
+# Kubernetes Secrets
+# -----------------------------
+*.secret.yaml
+
+# -----------------------------
+# Python Cache
+# -----------------------------
 .pytest_cache/
-.coverage
-.mypy_cache/
-htmlcov/
 
-# Python packaging
-*.egg-info/
-dist/
-build/
-
-# Node (if using frontend tooling)
-node_modules/
-
-# Environment-specific
-.env.*.local
-local_settings.py
+# -----------------------------
+# Docker
+# -----------------------------
+*.pid
