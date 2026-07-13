@@ -1,0 +1,43 @@
+
+services:
+  web:
+    build: .
+    container_name: prescripto-web
+
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        gunicorn --bind 0.0.0.0:8000 prescripto.wsgi:application
+      "
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - db
+
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:16
+
+    container_name: prescripto-db
+
+    environment:
+      POSTGRES_DB: prescripto
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

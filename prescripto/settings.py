@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 """
 Production settings for Prescripto - PythonAnywhere Compatible
 """
@@ -61,13 +65,33 @@ TEMPLATES = [
 WSGI_APPLICATION = 'prescripto.wsgi.application'
 
 # Database - SQLite for PythonAnywhere (simple and free)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+try:
+    import psycopg
+    # psycopg2-binary/psycopg2 is checked, we can also check psycopg2
+    import psycopg2
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
+        }
     }
-}
-
+except ImportError:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

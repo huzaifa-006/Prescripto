@@ -1,0 +1,6 @@
+aws_region         = "ap-south-1"
+instance_type      = "t3.micro"
+instance_name      = "prescripto-server"
+key_pair_name      = "prescripto-key"
+vps_cidr           = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"

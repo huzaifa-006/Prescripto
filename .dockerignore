@@ -1,0 +1,13 @@
+.git
+.github
+venv
+venc
+__pycache__
+*.pyc
+*.sqlite3
+.env
+*.log
+terraform
+kubernetes
+docker
+README.md
