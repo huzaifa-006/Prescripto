@@ -172,6 +172,27 @@ class PrescriptionMedicineForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].required = False
 
+    def has_changed(self):
+        """Treat rows with no medicine selected and no custom medicine as empty/unchanged.
+        This prevents empty medicine rows from being saved or causing validation errors."""
+        # If editing an existing instance, use default behavior
+        if self.instance and self.instance.pk:
+            return super().has_changed()
+
+        # For new forms, check if any meaningful medicine data was entered
+        data = self.data if self.data else {}
+        prefix = self.prefix
+
+        medicine_val = data.get(f'{prefix}-medicine', '')
+        custom_medicine_val = data.get(f'{prefix}-custom_medicine', '').strip()
+
+        # If neither a medicine from dropdown nor a custom medicine name is provided,
+        # treat this form as empty (not changed) so it gets skipped
+        if not medicine_val and not custom_medicine_val:
+            return False
+
+        return super().has_changed()
+
     def clean(self):
         cleaned_data = super().clean()
 
@@ -193,7 +214,7 @@ PrescriptionMedicineFormSet = forms.inlineformset_factory(
     Prescription,
     PrescriptionMedicine,
     form=PrescriptionMedicineForm,
-    extra=3,
+    extra=7,
     can_delete=True
 )
 
