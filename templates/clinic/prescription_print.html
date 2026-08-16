@@ -344,6 +344,7 @@
             table-layout: fixed;
             font-size: 11pt;
             border: 1px solid #000;
+            font-family: 'Calibri', sans-serif;
         }
 
         .med-table th,
@@ -397,6 +398,10 @@
             overflow-wrap: anywhere;
         }
 
+        .med-table td.instructions-cell .english-instruction {
+            font-family: 'Calibri', sans-serif;
+        }
+
         .urdu-sub {
             display: block;
             font-family: var(--urdu-font-family);
@@ -440,7 +445,7 @@
             gap: 6mm;
             align-items: flex-start;
             width: 100%;
-            justify-content: space-between;
+            justify-content: flex-start;
             margin-top: 4mm;
         }
 
@@ -471,27 +476,27 @@
         .instructions-right {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: flex-start;
             gap: 2.2mm;
             min-width: 32%;
             max-width: 50%;
-            margin-left: auto;
+            margin-left: 0;
+            margin-right: auto;
             flex: 0 0 auto;
             box-sizing: border-box;
-            margin-right: 0;
         }
 
         .instructions-right .counseled {
             margin-top: 0;
-            align-self: flex-end;
+            align-self: flex-start;
         }
 
         .instructions-right .lab-tests {
             width: 90%;
             min-width: 50mm;
             max-width: 100mm;
-            margin: 0 0 1mm auto;
-            align-self: flex-end;
+            margin: 0 auto 1mm 0;
+            align-self: flex-start;
             flex: 0 0 auto;
             display: block;
             box-sizing: border-box;
@@ -526,7 +531,7 @@
 
         /* push the instructions text down to align with lab tests */
         .instructions-bottom-row .instructions-left {
-            margin-top: 8mm;
+            margin-top: 0;
         }
 
         .counseled {
@@ -540,7 +545,7 @@
             /* margin-bottom: 40px; */
         }
 
-.footer {
+        .footer {
             border-top: 1px solid #000;
             padding: 2mm 0 0;
             margin-top: 3px;
@@ -548,6 +553,27 @@
             justify-content: space-between;
             gap: 4mm;
             min-height: 22mm;
+        }
+
+        .whatsapp-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5mm;
+            margin-top: 2mm;
+            margin-left: -5px;
+            margin-right: auto;
+        }
+
+        .whatsapp-info svg {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .whatsapp-info span {
+            font-size: 11pt;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         .note {
@@ -794,7 +820,7 @@
                                         -
                                     {% endif %}
                                 </td>
-                                <td class="instructions-cell"><span class="urdu-font">{{ med.get_instruction_display_text }}</span></td>
+                                <td class="instructions-cell">{{ med.get_instruction_html|safe }}</td>
                             </tr>
                             {% endif %}
                             {% empty %}
@@ -818,7 +844,7 @@
                 <div aria-hidden="true"></div>
                 <div class="instructions-row-content">
                     <div class="instructions-left">
-                        <!-- <div class="instructions-title">Instructions:</div>
+                        <div class="instructions-title">Instructions:</div>
                         <ol>
                             {% if prescription.instruction_avoid_food %}
                             <li>Avoid Citrus, Fried, Cold and Junk food items.</li>
@@ -838,7 +864,7 @@
                             {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.other_instructions %}
                             <li>&nbsp;</li>
                             {% endif %}
-                        </ol> -->
+                        </ol>
                     </div>
                     <div class="instructions-right">
                         {% if prescription.tests_ordered.exists %}
@@ -869,34 +895,9 @@
                     <strong>Note:</strong> This Prescription is advised on the basis of current symptoms. <br>Disease
                     pattern may change in hours by nature. In case of emergency, <br>Visit nearby hospital.
                 </div>
-                <div class="footer-right">
-                    <div class="instructions-footer">
-                        <div class="instructions-title">Instructions:</div>
-                        <ol>
-                            {% if prescription.instruction_avoid_food %}
-                            <li>Avoid Citrus, Fried, Cold and Junk food items.</li>
-                            {% endif %}
-                            {% if prescription.instruction_no_smoking %}
-                            <li>Smoking, Cold drinks strongly prohibited.</li>
-                            {% endif %}
-                            {% if prescription.instruction_gargles %}
-                            <li>Gargles after any type of inhaler are mandatory.</li>
-                            {% endif %}
-                            {% if prescription.instruction_warm_liquids %}
-                            <li>Use Warm liquids frequently.</li>
-                            {% endif %}
-                            {% if prescription.other_instructions %}
-                            <li>{{ prescription.other_instructions }}</li>
-                            {% endif %}
-                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.other_instructions %}
-                            <li>&nbsp;</li>
-                            {% endif %}
-                        </ol>
-                    </div>
-                    <!-- <div class="counseled">
-                        <span>{% if prescription.counseled_in_detail %}☑{% else %}☐{% endif %}</span>
-                        <span>Counseled in detail</span>
-                    </div> -->
+                <div class="whatsapp-info">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#000000" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+                    <span>0318 - 5420060</span>
                 </div>
             </div>
         </div>

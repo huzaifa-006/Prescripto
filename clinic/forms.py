@@ -91,6 +91,8 @@ class PrescriptionMedicineForm(forms.ModelForm):
         ('نیبولائزر کے ساتھ', 'نیبولائزر کے ساتھ (With nebulizer)'),
         ('نیبولائزر کے بغیر', 'نیبولائزر کے بغیر (Without nebulizer)'),
         ('دوائی کے ساتھ', 'دوائی کے ساتھ (With medicine)'),
+        ('With Revolizer', 'With Revolizer'),
+        ('Without Revolizer', 'Without Revolizer'),
         ('custom', 'Custom Instruction'),
     ]
 

@@ -252,6 +252,27 @@ class PrescriptionMedicine(models.Model):
             return "-"
 
         return self.INSTRUCTION_TRANSLATIONS.get(instruction.lower(), instruction)
+
+    def get_instruction_html(self):
+        """Returns HTML with appropriate font class for instructions.
+        Urdu preset instructions get urdu-font class, English/custom text gets english-instruction class (Calibri)."""
+        from django.utils.html import escape
+        instruction = (self.instructions or "").strip()
+        if not instruction:
+            return "-"
+
+        # Check if it matches an English key (legacy data) - translate to Urdu
+        translated = self.INSTRUCTION_TRANSLATIONS.get(instruction.lower())
+        if translated:
+            return f'<span class="urdu-font">{escape(translated)}</span>'
+
+        # Check if the instruction is already one of the preset Urdu values
+        urdu_values = set(self.INSTRUCTION_TRANSLATIONS.values())
+        if instruction in urdu_values:
+            return f'<span class="urdu-font">{escape(instruction)}</span>'
+
+        # It's English or custom text (e.g., "With Revolizer", custom instruction) - use Calibri
+        return f'<span class="english-instruction">{escape(instruction)}</span>'
     
     def __str__(self):
         return f"{self.get_medicine_name()} for {self.prescription.patient.name}"
