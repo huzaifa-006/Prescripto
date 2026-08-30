@@ -21,6 +21,34 @@
         <form method="post" class="prescription-form" id="prescriptionForm">
             {% csrf_token %}
 
+            <!-- Admit Patient Toggle -->
+            <div class="admit-toggle-banner" id="admitToggleBanner">
+                <label class="admit-toggle-label">
+                    {{ form.is_admitted }}
+                    <span class="admit-toggle-text">
+                        <i class="fas fa-hospital"></i> Admit Patient (IPD)
+                    </span>
+                </label>
+                <div class="admission-details" id="admissionDetails" style="display: none;">
+                    <div class="form-row" style="gap: 12px;">
+                        <div class="form-group">
+                            <label for="id_admission_date">Admission Date</label>
+                            {{ form.admission_date }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_ward">Ward</label>
+                            {{ form.ward }}
+                        </div>
+                        <div class="form-group">
+                            <label for="id_bed_number">Bed No.</label>
+                            {{ form.bed_number }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template Loader (OPD only) -->
+            <div id="opdTemplateLoader">
             {% if templates %}
             <div class="template-loader">
                 <div class="template-loader-top">
@@ -45,6 +73,7 @@
                 <a href="{% url 'template_create' %}" class="btn-link">Create one</a>
             </div>
             {% endif %}
+            </div>
 
             <div class="form-sections">
                 <!-- Clinical Information -->
@@ -147,7 +176,24 @@
                     </div>
                 </section>
 
-                <!-- Medicines (Rx) -->
+                <!-- IPD Treatment Orders - Shown only when Admit Patient is checked -->
+                <div id="ipdPrescriptionSection" style="display: none;">
+                <section class="form-section ipd-section" style="margin-bottom: 20px;">
+                    <h3><i class="fas fa-procedures"></i> IPD Prescription / Orders</h3>
+                    <div class="form-group">
+                        <label for="id_ipd_prescription" style="display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="fas fa-clipboard-list"></i> Enter IPD Orders</span>
+                            <button type="button" class="btn-voice ipd-voice-btn" data-target="id_ipd_prescription" title="Click to speak">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                        </label>
+                        {{ form.ipd_prescription }}
+                    </div>
+                </section>
+                </div>
+
+                <!-- Medicines (Rx) - OPD Only -->
+                <div id="opdMedicinesSection">
                 <section class="form-section medicines-section">
                     <h3><i class="fas fa-prescription"></i> Rx - Medicines</h3>
 
@@ -233,6 +279,7 @@
                         <i class="fas fa-plus"></i> Add Medicine
                     </button>
                 </section>
+                </div>
 
                 <!-- Two Column Layout for Instructions and Lab Tests -->
                 <div class="form-row" style="gap: 20px;">
@@ -322,6 +369,8 @@
         initializeInstructionFields();
         setupTemplateLoader();
         setupDiagnosisMulti();
+        setupAdmitToggle();
+        setupIpdVoiceInputs();
     });
 
     function initializeSelect2() {
@@ -721,6 +770,90 @@
 
     // Initialize Voice Features
     setupVoiceInput('voiceBtn', 'id_clinical_record');
+
+    // ============ Admit Patient Toggle ============
+    function setupAdmitToggle() {
+        const checkbox = document.getElementById('id_is_admitted');
+        if (!checkbox) return;
+
+        const ipdPrescriptionSection = document.getElementById('ipdPrescriptionSection');
+        const admissionDetails = document.getElementById('admissionDetails');
+        const banner = document.getElementById('admitToggleBanner');
+
+        function toggleMode() {
+            const isAdmitted = checkbox.checked;
+
+            if (isAdmitted) {
+                // Switch to IPD mode
+                if (ipdPrescriptionSection) ipdPrescriptionSection.style.display = 'block';
+                if (admissionDetails) admissionDetails.style.display = 'block';
+                if (banner) banner.classList.add('admitted');
+
+                // Auto-fill admission date to today if empty
+                const admDateField = document.getElementById('id_admission_date');
+                if (admDateField && !admDateField.value) {
+                    admDateField.value = new Date().toISOString().split('T')[0];
+                }
+            } else {
+                // Switch to OPD mode
+                if (ipdPrescriptionSection) ipdPrescriptionSection.style.display = 'none';
+                if (admissionDetails) admissionDetails.style.display = 'none';
+                if (banner) banner.classList.remove('admitted');
+            }
+        }
+
+        checkbox.addEventListener('change', toggleMode);
+
+        // Initialize on page load (handles edit mode where checkbox may already be checked)
+        toggleMode();
+    }
+
+    // ============ IPD Voice Input ============
+    function setupIpdVoiceInputs() {
+        if (!('webkitSpeechRecognition' in window)) {
+            document.querySelectorAll('.ipd-voice-btn').forEach(btn => btn.style.display = 'none');
+            return;
+        }
+
+        document.querySelectorAll('.ipd-voice-btn').forEach(btn => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const recognition = new webkitSpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function () {
+                btn.classList.add('recording');
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+            };
+
+            recognition.onend = function () {
+                btn.classList.remove('recording');
+                btn.innerHTML = '<i class="fas fa-microphone"></i>';
+            };
+
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                if (input.value.trim() !== "") {
+                    input.value += "\n" + transcript;
+                } else {
+                    input.value = transcript;
+                }
+            };
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (btn.classList.contains('recording')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+        });
+    }
 </script>
 <style>
     .btn-voice {
@@ -902,6 +1035,97 @@
     .diagnosis-wrapper .select2-container {
         width: 100% !important;
         margin-top: 6px;
+    }
+
+    /* ============ Admit Toggle Banner ============ */
+    .admit-toggle-banner {
+        background: #f8f9fb;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .admit-toggle-banner.admitted {
+        background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        border-color: #4caf50;
+    }
+
+    .admit-toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1.05rem;
+    }
+
+    .admit-toggle-text {
+        color: #1a1a2e;
+    }
+
+    .admit-toggle-text i {
+        color: #4caf50;
+        margin-right: 4px;
+    }
+
+    .admit-toggle-banner.admitted .admit-toggle-text {
+        color: #2e7d32;
+    }
+
+    .admission-details {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(76, 175, 80, 0.3);
+    }
+
+    /* ============ IPD Treatment Orders ============ */
+    .ipd-section {
+        border-left: 4px solid #4caf50 !important;
+    }
+
+    .ipd-orders-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .ipd-order-item {
+        background: #f8fdf8;
+        border: 1px solid #e8f5e9;
+        border-radius: 10px;
+        padding: 14px;
+    }
+
+    .ipd-order-item label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        color: #2e7d32;
+        margin-bottom: 8px;
+    }
+
+    .ipd-order-item label i {
+        font-size: 0.95em;
+    }
+
+    .ipd-voice-btn {
+        margin-left: auto;
+    }
+
+    .ipd-textarea {
+        min-height: 80px;
+        font-family: "Segoe UI", sans-serif;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+        .ipd-orders-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 {% endblock %}

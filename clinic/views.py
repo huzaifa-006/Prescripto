@@ -794,6 +794,13 @@ def prescription_duplicate(request, pk):
         tb=original.tb,
         smoking=original.smoking,
         is_first_visit=False,
+        # IPD fields
+        is_admitted=original.is_admitted,
+        admission_date=timezone.now().date() if original.is_admitted else None,
+        bed_number=original.bed_number,
+        ward=original.ward,
+        ipd_prescription=original.ipd_prescription,
+        # Vitals and other
         pulse=original.pulse,
         spo2=original.spo2,
         blood_pressure=original.blood_pressure,

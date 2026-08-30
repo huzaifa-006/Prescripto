@@ -148,6 +148,16 @@ class Prescription(models.Model):
     # Visit info
     is_first_visit = models.BooleanField(default=True)
     
+    # Admission (IPD) flag and details
+    is_admitted = models.BooleanField(default=False, verbose_name="Admitted Patient (IPD)")
+    admission_date = models.DateField(null=True, blank=True, verbose_name="Admission Date")
+    bed_number = models.CharField(max_length=20, blank=True, verbose_name="Bed Number")
+    ward = models.CharField(max_length=100, blank=True, verbose_name="Ward")
+    
+    # IPD Treatment Orders
+    ipd_prescription = models.TextField(blank=True, verbose_name="IPD Prescription / Orders",
+        help_text="Type IPD prescription or orders here")
+    
     # Vital signs
     pulse = models.CharField(max_length=20, blank=True)
     spo2 = models.CharField(max_length=20, blank=True)

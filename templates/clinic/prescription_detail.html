@@ -131,10 +131,51 @@
         </div>
         {% endif %}
 
+        <!-- Admission Badge (if admitted) -->
+        {% if prescription.is_admitted %}
+        <div class="prescription-section">
+            <div style="background: linear-gradient(135deg, #4caf50, #2e7d32); color: white; padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 600;">
+                <i class="fas fa-hospital"></i> Admitted Patient (IPD)
+            </div>
+            {% if prescription.admission_date or prescription.ward or prescription.bed_number %}
+            <div class="patient-info-grid" style="margin-top: 12px;">
+                {% if prescription.admission_date %}
+                <div class="info-item">
+                    <span class="label">Admission Date</span>
+                    <span class="value">{{ prescription.admission_date|date:"d F Y" }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.ward %}
+                <div class="info-item">
+                    <span class="label">Ward</span>
+                    <span class="value">{{ prescription.ward }}</span>
+                </div>
+                {% endif %}
+                {% if prescription.bed_number %}
+                <div class="info-item">
+                    <span class="label">Bed Number</span>
+                    <span class="value">{{ prescription.bed_number }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if prescription.is_admitted and prescription.ipd_prescription %}
+        <!-- IPD Prescription Free Text -->
+        <div class="prescription-section">
+            <h3><i class="fas fa-procedures"></i> IPD Prescription / Orders</h3>
+            <div style="margin-bottom: 14px;">
+                <div style="margin-top: 4px; white-space: pre-line; background: #f5f8ff; padding: 14px; border-radius: 6px; border-left: 4px solid #1976d2; font-size: 1.05em; line-height: 1.5;">{{ prescription.ipd_prescription }}</div>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Medicines -->
+        {% if prescription.medicines.exists %}
         <div class="prescription-section">
             <h3><i class="fas fa-prescription"></i> Rx - Medicines</h3>
-            {% if prescription.medicines.exists %}
             <table class="medicines-detail-table">
                 <thead>
                     <tr>
@@ -169,10 +210,8 @@
                     {% endfor %}
                 </tbody>
             </table>
-            {% else %}
-            <p class="empty-text">No medicines prescribed</p>
-            {% endif %}
         </div>
+        {% endif %}
 
         <!-- Instructions -->
         {% if prescription.instruction_avoid_food or prescription.instruction_no_smoking or prescription.instruction_gargles or prescription.instruction_warm_liquids or prescription.other_instructions  %}

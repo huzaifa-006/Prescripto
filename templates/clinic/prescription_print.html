@@ -811,6 +811,15 @@
                 </div>
 
                 <div class="right-col">
+                    {% if prescription.is_admitted and prescription.ipd_prescription %}
+                    <div style="font-size: 14pt; font-weight: bold; margin-bottom: 2mm; border-bottom: 2px solid #000; display: inline-block;">
+                        IPD Prescription
+                    </div>
+                    <div style="white-space: pre-line; margin-bottom: 6mm; font-size: 12pt; line-height: 1.4;">{{ prescription.ipd_prescription }}</div>
+                    {% endif %}
+
+                    {% if prescription.medicines.exists %}
+                    <!-- Medicines Table -->
                     <div class="rx-title">℞</div>
                     <table class="med-table">
                         <thead>
@@ -853,20 +862,10 @@
                                 <td class="instructions-cell">{{ med.get_instruction_html|safe }}</td>
                             </tr>
                             {% endif %}
-                            {% empty %}
-                            <tr>
-                                <td>&nbsp;</td>
-                                <td class="time-cell">-</td>
-                                <td class="time-cell">-</td>
-                                <td class="time-cell">-</td>
-                                <td class="time-cell">-</td>
-                                <td class="duration-cell">-</td>
-                                <td class="instructions-cell">-</td>
-                            </tr>
                             {% endfor %}
                         </tbody>
                     </table>
-                    
+                    {% endif %}
                 </div>
             </div>
 

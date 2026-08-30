@@ -41,9 +41,9 @@ class LabTestAdmin(admin.ModelAdmin):
 
 @admin.register(Prescription)
 class PrescriptionAdmin(admin.ModelAdmin):
-    list_display = ['patient', 'doctor', 'date', 'is_first_visit', 'created_at']
+    list_display = ['patient', 'doctor', 'date', 'is_first_visit', 'is_admitted', 'created_at']
     search_fields = ['patient__name', 'patient__patient_id']
-    list_filter = ['date', 'is_first_visit', 'doctor']
+    list_filter = ['date', 'is_first_visit', 'is_admitted', 'doctor']
     inlines = [PrescriptionMedicineInline]
 
 
