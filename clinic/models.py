@@ -143,6 +143,7 @@ class Prescription(models.Model):
     hep_b = models.BooleanField(default=False, verbose_name="Hep-B")
     hep_c = models.BooleanField(default=False, verbose_name="Hep-C")
     obesity = models.BooleanField(default=False, verbose_name="Obesity")
+    pregnancy = models.BooleanField(default=False, verbose_name="Pregnancy")
     other_history = models.CharField(max_length=200, blank=True, help_text="Other medical history notes")
     
     # Visit info
@@ -176,6 +177,7 @@ class Prescription(models.Model):
     instruction_no_smoking = models.BooleanField(default=False, verbose_name="Smoking, Cold drinks strongly prohibited")
     instruction_gargles = models.BooleanField(default=False, verbose_name="Gargles after any type of inhaler are mandatory")
     instruction_warm_liquids = models.BooleanField(default=False, verbose_name="Use warm liquids frequently")
+    instruction_weight_reduction = models.BooleanField(default=False, verbose_name="Weight reduction advised")
     
     # Other instructions (text field for custom instructions)
     other_instructions = models.TextField(blank=True, help_text="Additional custom instructions")

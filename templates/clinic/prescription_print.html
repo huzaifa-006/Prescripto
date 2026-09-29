@@ -74,9 +74,11 @@
             transform: translate(-50%, -50%);
             width: 140mm;
             height: auto;
-            opacity: 0.15;
+            opacity: 0.40;
             pointer-events: none;
             z-index: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
         .header {
@@ -479,14 +481,14 @@
         .instructions-left {
             flex: 1 1 60%;
             max-width: 100%;
-            font-size: 11pt;
-            line-height: 1.2;
+            font-size: 10pt;
+            line-height: 1.15;
             margin-top: 0;
         }
 
         .instructions-title {
             font-weight: 700;
-            margin-bottom: 0.6mm;
+            margin-bottom: 0.4mm;
         }
 
         .instructions-left ol {
@@ -662,6 +664,11 @@
         }
 
         @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
             body {
                 background: #fff;
             }
@@ -677,8 +684,11 @@
             }
 
             .lungs-watermark {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 0.40 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
         .d-details {
@@ -759,6 +769,7 @@
                     {% if prescription.hep_b %} / Hep-B{% endif %}
                     {% if prescription.hep_c %} / Hep-C{% endif %}
                     {% if prescription.obesity %} / Obesity{% endif %}
+                    {% if prescription.pregnancy %} / Pregnancy{% endif %}
                     {% if prescription.other_history %} / {{ prescription.other_history }}{% endif %}
                 </span>
             </div>
@@ -887,10 +898,13 @@
                             {% if prescription.instruction_warm_liquids %}
                             <li>Use Warm liquids frequently.</li>
                             {% endif %}
+                            {% if prescription.instruction_weight_reduction %}
+                            <li>Weight reduction advised.</li>
+                            {% endif %}
                             {% if prescription.other_instructions %}
                             <li>{{ prescription.other_instructions }}</li>
                             {% endif %}
-                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.other_instructions %}
+                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.instruction_weight_reduction and not prescription.other_instructions %}
                             <li>&nbsp;</li>
                             {% endif %}
                         </ol>

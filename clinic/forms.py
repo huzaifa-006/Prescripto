@@ -35,13 +35,13 @@ class PrescriptionForm(forms.ModelForm):
         model = Prescription
         fields = [
             'date', 'time', 'diagnosis', 'clinical_record', 'dm', 'htn', 'ihd', 'tb', 'smoking',
-            'hep_b', 'hep_c', 'obesity', 'other_history',
+            'hep_b', 'hep_c', 'obesity', 'pregnancy', 'other_history',
             'is_first_visit', 'is_admitted', 'admission_date', 'bed_number', 'ward',
             'ipd_prescription',
             'pulse', 'spo2', 'blood_pressure', 'sugar', 'temperature',
             'respiratory_rate', 'other_vitals', 'chest_notes', 'tests_ordered',
             'instruction_avoid_food', 'instruction_no_smoking', 'instruction_gargles',
-            'instruction_warm_liquids', 'other_instructions', 'counseled_in_detail',
+            'instruction_warm_liquids', 'instruction_weight_reduction', 'other_instructions', 'counseled_in_detail',
             'rescue_rx_given', 'follow_up'
         ]
         widgets = {
@@ -58,6 +58,7 @@ class PrescriptionForm(forms.ModelForm):
             'hep_b': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'hep_c': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'obesity': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'pregnancy': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'other_history': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Other medical history'}),
             'is_first_visit': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'is_admitted': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'id_is_admitted'}),
@@ -78,6 +79,7 @@ class PrescriptionForm(forms.ModelForm):
             'instruction_no_smoking': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'instruction_gargles': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'instruction_warm_liquids': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'instruction_weight_reduction': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'other_instructions': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Additional instructions'}),
             'counseled_in_detail': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'rescue_rx_given': forms.CheckboxInput(attrs={'class': 'form-check-input'}),

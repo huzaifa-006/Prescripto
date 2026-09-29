@@ -214,7 +214,7 @@
         {% endif %}
 
         <!-- Instructions -->
-        {% if prescription.instruction_avoid_food or prescription.instruction_no_smoking or prescription.instruction_gargles or prescription.instruction_warm_liquids or prescription.other_instructions  %}
+        {% if prescription.instruction_avoid_food or prescription.instruction_no_smoking or prescription.instruction_gargles or prescription.instruction_warm_liquids or prescription.instruction_weight_reduction or prescription.other_instructions  %}
         <div class="prescription-section">
             <h3><i class="fas fa-clipboard-list"></i> Instructions</h3>
             <div class="instructions-content">
@@ -230,6 +230,9 @@
                     {% endif %}
                     {% if prescription.instruction_warm_liquids %}
                     <li>Use warm liquids frequently.</li>
+                    {% endif %}
+                    {% if prescription.instruction_weight_reduction %}
+                    <li>Weight reduction advised.</li>
                     {% endif %}
                 </ul>
                 {% if prescription.other_instructions %}
