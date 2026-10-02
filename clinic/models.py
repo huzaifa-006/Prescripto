@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from decimal import Decimal
 import random
 import string
 
@@ -215,10 +216,10 @@ class PrescriptionMedicine(models.Model):
     dosage = models.CharField(max_length=100, blank=True, help_text="e.g., 500mg")
     
     # Frequency - timing (number of tablets/doses)
-    morning = models.PositiveIntegerField(default=0, help_text="Number of tablets in morning")
-    afternoon = models.PositiveIntegerField(default=0, help_text="Number of tablets in afternoon")
-    evening = models.PositiveIntegerField(default=0, help_text="Number of tablets in evening")
-    night = models.PositiveIntegerField(default=0, help_text="Number of tablets at night")
+    morning = models.DecimalField(max_digits=3, decimal_places=1, default=0, help_text="Number of tablets/dose in morning")
+    afternoon = models.DecimalField(max_digits=3, decimal_places=1, default=0, help_text="Number of tablets/dose in afternoon")
+    evening = models.DecimalField(max_digits=3, decimal_places=1, default=0, help_text="Number of tablets/dose in evening")
+    night = models.DecimalField(max_digits=3, decimal_places=1, default=0, help_text="Number of tablets/dose at night")
     
     # Duration
     days = models.PositiveIntegerField(default=1, help_text="Number of days")
@@ -257,6 +258,36 @@ class PrescriptionMedicine(models.Model):
         if self.medicine:
             return str(self.medicine)
         return self.custom_medicine or "Unknown"
+
+    @staticmethod
+    def format_dose(val):
+        if val is None or val == '':
+            return ""
+        try:
+            d = Decimal(str(val))
+            if d == 0:
+                return ""
+            if d == d.to_integral():
+                return str(int(d))
+            return str(d.normalize())
+        except Exception:
+            return str(val)
+
+    @property
+    def morning_display(self):
+        return self.format_dose(self.morning)
+
+    @property
+    def afternoon_display(self):
+        return self.format_dose(self.afternoon)
+
+    @property
+    def evening_display(self):
+        return self.format_dose(self.evening)
+
+    @property
+    def night_display(self):
+        return self.format_dose(self.night)
 
     def get_instruction_display_text(self):
         instruction = (self.instructions or "").strip()

@@ -198,10 +198,10 @@
                         <td class="medicine-name">{{ med.get_medicine_name }}</td>
                         <td>{{ med.dosage|default:"-" }}</td>
                         <td class="timing-cells">
-                            <span class="{% if med.morning %}checked{% endif %}">{% if med.morning %}✓{% else %}-{% endif %}</span>
-                            <span class="{% if med.afternoon %}checked{% endif %}">{% if med.afternoon %}✓{% else %}-{% endif %}</span>
-                            <span class="{% if med.evening %}checked{% endif %}">{% if med.evening %}✓{% else %}-{% endif %}</span>
-                            <span class="{% if med.night %}checked{% endif %}">{% if med.night %}✓{% else %}-{% endif %}</span>
+                            <span class="{% if med.morning %}checked{% endif %}">{% if med.morning %}{{ med.morning_display|default:med.morning }}{% else %}-{% endif %}</span>
+                            <span class="{% if med.afternoon %}checked{% endif %}">{% if med.afternoon %}{{ med.afternoon_display|default:med.afternoon }}{% else %}-{% endif %}</span>
+                            <span class="{% if med.evening %}checked{% endif %}">{% if med.evening %}{{ med.evening_display|default:med.evening }}{% else %}-{% endif %}</span>
+                            <span class="{% if med.night %}checked{% endif %}">{% if med.night %}{{ med.night_display|default:med.night }}{% else %}-{% endif %}</span>
                         </td>
                         <td>{{ med.days }} day(s)</td>
                         <td>{{ med.get_instruction_display_text }}</td>

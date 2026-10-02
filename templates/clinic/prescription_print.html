@@ -849,10 +849,10 @@
                             {% if med.medicine or med.custom_medicine %}
                             <tr>
                                 <td>{{ med.get_medicine_name }}{% if med.dosage %} {{ med.dosage }}{% endif %}</td>
-                                <td class="time-cell">{% if med.morning %}{{ med.morning }}{% else %}-{% endif %}</td>
-                                <td class="time-cell">{% if med.afternoon %}{{ med.afternoon }}{% else %}-{% endif %}</td>
-                                <td class="time-cell">{% if med.evening %}{{ med.evening }}{% else %}-{% endif %}</td>
-                                <td class="time-cell">{% if med.night %}{{ med.night }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.morning %}{{ med.morning_display|default:med.morning }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.afternoon %}{{ med.afternoon_display|default:med.afternoon }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.evening %}{{ med.evening_display|default:med.evening }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.night %}{{ med.night_display|default:med.night }}{% else %}-{% endif %}</td>
                                 <td class="duration-cell">
                                     {% if med.duration_choice == '1week' %}
                                         <span class="urdu-font">1 ہفتہ</span>

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django import forms
 from .models import Patient, Medicine, Prescription, PrescriptionMedicine, LabTest
 
@@ -87,6 +88,23 @@ class PrescriptionForm(forms.ModelForm):
         }
 
 
+def normalize_dose(value):
+    if value is None or value == '':
+        return '0'
+    try:
+        d = Decimal(str(value))
+        if d == d.to_integral():
+            return str(int(d))
+        return str(d.normalize()) if d != Decimal('0') else '0'
+    except Exception:
+        return str(value)
+
+
+class DoseField(forms.TypedChoiceField):
+    def prepare_value(self, value):
+        return normalize_dose(value)
+
+
 class PrescriptionMedicineForm(forms.ModelForm):
     """Form for adding medicines to a prescription"""
     INSTRUCTION_CHOICES = [
@@ -138,6 +156,55 @@ class PrescriptionMedicineForm(forms.ModelForm):
         ),
     )
 
+    DOSAGE_CHOICES = [
+        ('0', '0'),
+        ('0.5', '0.5'),
+        ('1', '1'),
+        ('1.5', '1.5'),
+        ('2', '2'),
+        ('2.5', '2.5'),
+        ('3', '3'),
+        ('3.5', '3.5'),
+        ('4', '4'),
+        ('4.5', '4.5'),
+        ('5', '5'),
+        ('5.5', '5.5'),
+        ('6', '6'),
+    ]
+
+    morning = DoseField(
+        choices=DOSAGE_CHOICES,
+        coerce=Decimal,
+        empty_value=Decimal('0'),
+        required=False,
+        initial='0',
+        widget=forms.Select(attrs={'class': 'form-control timing-select'}),
+    )
+    afternoon = DoseField(
+        choices=DOSAGE_CHOICES,
+        coerce=Decimal,
+        empty_value=Decimal('0'),
+        required=False,
+        initial='0',
+        widget=forms.Select(attrs={'class': 'form-control timing-select'}),
+    )
+    evening = DoseField(
+        choices=DOSAGE_CHOICES,
+        coerce=Decimal,
+        empty_value=Decimal('0'),
+        required=False,
+        initial='0',
+        widget=forms.Select(attrs={'class': 'form-control timing-select'}),
+    )
+    night = DoseField(
+        choices=DOSAGE_CHOICES,
+        coerce=Decimal,
+        empty_value=Decimal('0'),
+        required=False,
+        initial='0',
+        widget=forms.Select(attrs={'class': 'form-control timing-select'}),
+    )
+
     class Meta:
         model = PrescriptionMedicine
         fields = ['medicine', 'custom_medicine', 'dosage', 'morning', 'afternoon', 'evening', 'night', 'days', 'duration_choice', 'custom_duration', 'instructions']
@@ -145,18 +212,20 @@ class PrescriptionMedicineForm(forms.ModelForm):
             'medicine': forms.Select(attrs={'class': 'form-control medicine-select'}),
             'custom_medicine': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Or type medicine name here'}),
             'dosage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dosage'}),
-            'morning': forms.NumberInput(attrs={'class': 'form-control timing-input', 'min': 0, 'max': 9, 'style': 'width: 45px; text-align: center;', 'placeholder': '0'}),
-            'afternoon': forms.NumberInput(attrs={'class': 'form-control timing-input', 'min': 0, 'max': 9, 'style': 'width: 45px; text-align: center;', 'placeholder': '0'}),
-            'evening': forms.NumberInput(attrs={'class': 'form-control timing-input', 'min': 0, 'max': 9, 'style': 'width: 45px; text-align: center;', 'placeholder': '0'}),
-            'night': forms.NumberInput(attrs={'class': 'form-control timing-input', 'min': 0, 'max': 9, 'style': 'width: 45px; text-align: center;', 'placeholder': '0'}),
             'days': forms.NumberInput(attrs={'class': 'form-control days-input', 'min': 1, 'style': 'width: 70px;'}),
-            'duration_choice': forms.Select(attrs={'class': 'form-control duration-select', 'style': 'width: 100px;'}),
-            'custom_duration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Custom', 'style': 'width: 80px;'}),
+            'duration_choice': forms.Select(attrs={'class': 'form-control duration-select', 'style': 'width: 100%;'}),
+            'custom_duration': forms.TextInput(attrs={'class': 'form-control custom-duration-input', 'placeholder': 'Custom duration', 'style': 'width: 100%; display: none;'}),
             'instructions': forms.HiddenInput(),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        existing_duration_choice = self.initial.get('duration_choice') or (self.instance.duration_choice if self.instance and self.instance.pk else '')
+        if existing_duration_choice == 'custom':
+            self.fields['custom_duration'].widget.attrs['style'] = 'width: 100%; display: block;'
+        else:
+            self.fields['custom_duration'].widget.attrs['style'] = 'width: 100%; display: none;'
 
         existing_instruction = (self.initial.get('instructions') or '').strip()
         if not existing_instruction and self.instance and self.instance.pk:
@@ -175,6 +244,7 @@ class PrescriptionMedicineForm(forms.ModelForm):
         elif existing_instruction:
             self.fields['instruction_choice'].initial = 'custom'
             self.fields['custom_instruction'].initial = existing_instruction
+            self.fields['custom_instruction'].widget.attrs['style'] = 'width: 100%; display: block;'
         else:
             self.fields['instruction_choice'].initial = ''
             self.fields['custom_instruction'].initial = ''
