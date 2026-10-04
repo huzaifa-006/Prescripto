@@ -156,7 +156,7 @@ class PrescriptionMedicineFormTests(TestCase):
 
     def test_timing_dropdowns_have_expected_choices(self):
         form = PrescriptionMedicineForm()
-        expected_values = ['0', '0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6']
+        expected_values = ['0', '0.5', '1', '1.5', '2', '2.5', '3']
         for field_name in ['morning', 'afternoon', 'evening', 'night']:
             field = form.fields[field_name]
             values = [val for val, _ in field.choices]

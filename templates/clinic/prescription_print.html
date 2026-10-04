@@ -144,8 +144,8 @@
 
         .patient-id-corner {
             position: absolute;
-            top: 1.5mm;
-            right: 2.5mm;
+            bottom: 0.8mm;
+            right: 1mm;
             font-size: 8.5pt;
             font-weight: 600;
             color: #333;
@@ -773,8 +773,8 @@
     <div class="page-wrap">
         <div class="sheet">
             <img src="{% static 'images/lungs_watermark.jpg' %}" alt="" class="lungs-watermark">
-            <div class="patient-id-corner">{{ prescription.patient.patient_id }}</div>
             <div class="header">
+                <div class="patient-id-corner">{{ prescription.patient.patient_id }}</div>
                 <div class="doctor-panel">
                     <div class="doctor-title">Assistant Professor</div>
                     <div class="doctor-name">Dr. M. Mudassir Shafiq</div>
