@@ -43,7 +43,7 @@ class PrescriptionForm(forms.ModelForm):
             'respiratory_rate', 'other_vitals', 'chest_notes', 'tests_ordered',
             'instruction_avoid_food', 'instruction_no_smoking', 'instruction_gargles',
             'instruction_warm_liquids', 'instruction_weight_reduction', 'other_instructions', 'counseled_in_detail',
-            'rescue_rx_given', 'follow_up'
+            'rescue_rx_given', 'influvac_vaccine', 'follow_up'
         ]
         widgets = {
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
@@ -84,6 +84,7 @@ class PrescriptionForm(forms.ModelForm):
             'other_instructions': forms.Textarea(attrs={'class': 'form-control', 'rows': 2, 'placeholder': 'Additional instructions'}),
             'counseled_in_detail': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'rescue_rx_given': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'influvac_vaccine': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'follow_up': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Follow-up date/notes'}),
         }
 

@@ -189,6 +189,9 @@ class Prescription(models.Model):
     # Rescue Rx checkbox
     rescue_rx_given = models.BooleanField(default=False, verbose_name="Rescue Rx given with IV Steroid and Nebulization")
     
+    # Vaccine checkbox
+    influvac_vaccine = models.BooleanField(default=False, verbose_name="2026/2027 Influvac /vaxigrip ...I/M once only")
+    
     # Legacy field (keep for backward compatibility)
     special_instructions = models.TextField(blank=True)
     follow_up = models.CharField(max_length=100, blank=True)

@@ -90,6 +90,35 @@ class PrescriptionPrintViewTests(TestCase):
         self.assertNotContains(response, "Sugar:")
         self.assertNotContains(response, "Other:")
 
+    def test_prescription_print_shows_patient_id(self):
+        response = self.client.get(
+            reverse("prescription_print", kwargs={"pk": self.prescription.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.patient.patient_id)
+        self.assertContains(response, "patient-id-corner")
+        self.assertNotContains(response, "Patient ID:")
+
+    def test_prescription_print_shows_vaccine_line_when_checked(self):
+        self.prescription.influvac_vaccine = True
+        self.prescription.save()
+
+        response = self.client.get(
+            reverse("prescription_print", kwargs={"pk": self.prescription.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "2026/2027 Influvac /vaxigrip ...I/M once only")
+
+    def test_prescription_print_hides_vaccine_line_when_not_checked(self):
+        self.prescription.influvac_vaccine = False
+        self.prescription.save()
+
+        response = self.client.get(
+            reverse("prescription_print", kwargs={"pk": self.prescription.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "2026/2027 Influvac /vaxigrip ...I/M once only")
+
 
 class MedicineFormChoicesTests(TestCase):
     def test_medicine_form_includes_new_form_choices(self):

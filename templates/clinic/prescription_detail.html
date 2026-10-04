@@ -173,9 +173,10 @@
         {% endif %}
 
         <!-- Medicines -->
-        {% if prescription.medicines.exists %}
+        {% if prescription.medicines.exists or prescription.influvac_vaccine %}
         <div class="prescription-section">
             <h3><i class="fas fa-prescription"></i> Rx - Medicines</h3>
+            {% if prescription.medicines.exists %}
             <table class="medicines-detail-table">
                 <thead>
                     <tr>
@@ -210,6 +211,12 @@
                     {% endfor %}
                 </tbody>
             </table>
+            {% endif %}
+            {% if prescription.influvac_vaccine %}
+            <div class="vaccine-detail-note" style="margin-top: 12px; padding: 10px 14px; background: #f0f7ff; border-left: 4px solid #1976d2; font-weight: 600; font-size: 14px; color: #1e3a8a; border-radius: 4px;">
+                <i class="fas fa-syringe" style="margin-right: 8px;"></i> 2026/2027 Influvac /vaxigrip ...I/M once only
+            </div>
+            {% endif %}
         </div>
         {% endif %}
 

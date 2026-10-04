@@ -810,6 +810,7 @@ def prescription_duplicate(request, pk):
         other_vitals=original.other_vitals,
         chest_notes=original.chest_notes,
         special_instructions=original.special_instructions,
+        influvac_vaccine=original.influvac_vaccine,
         follow_up=original.follow_up,
     )
     
