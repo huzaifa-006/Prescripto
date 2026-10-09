@@ -181,11 +181,12 @@
             font-size: 11.5pt;
             padding: 3.4px;
         }
+
         .urdu-line1 {
             font-size: 12pt;
             font-style: italic;
         }
-        
+
         .patient-row {
             display: grid;
             grid-template-columns: 2.8fr 1.3fr 1fr 1.2fr 1.4fr 1fr;
@@ -407,7 +408,7 @@
 
         .med-table th.time-col {
             width: 6%;
-            
+
         }
 
         .med-table th.duration-col {
@@ -675,7 +676,8 @@
 
         .instructions-footer {
             width: 100%;
-            text-align: left; /* instructions left-aligned inside footer-right */
+            text-align: left;
+            /* instructions left-aligned inside footer-right */
             font-size: 10.5pt;
             line-height: 1.16;
         }
@@ -687,7 +689,8 @@
 
         .footer-right .counseled {
             margin-top: 4mm;
-            margin-right: 5mm; /* 5mm from right edge */
+            margin-right: 5mm;
+            /* 5mm from right edge */
         }
 
         @media print {
@@ -702,7 +705,8 @@
                 margin: 0 !important;
             }
 
-            html, body {
+            html,
+            body {
                 width: 100% !important;
                 height: 100% !important;
                 max-width: 210mm !important;
@@ -758,9 +762,11 @@
                 print-color-adjust: exact !important;
             }
         }
+
         .d-details {
             font-size: 11.5pt;
         }
+
         .d-details1 {
             font-size: 11pt;
         }
@@ -786,7 +792,7 @@
 
                 <div class="center-panel">
                     <img src="{% static 'images/logo.png' %}" alt="Rahim Hospital Logo" class="center-logo">
-                    
+
                 </div>
 
                 <div class="urdu-panel">
@@ -821,7 +827,8 @@
                 </div>
                 <div class="meta-field">
                     <span class="meta-label">Time:</span>
-                    <span class="meta-value">{% if prescription.time %}{{ prescription.time|time:"H:i" }}{% endif %}</span>
+                    <span class="meta-value">{% if prescription.time %}{{ prescription.time|time:"H:i" }}{% endif
+                        %}</span>
                 </div>
             </div>
 
@@ -846,10 +853,10 @@
             <div class="content">
                 <div class="left-col">
                     <div class="diagnosis">
-                                        <span class="clinical-label">Clinical Summary: <br><br></span>
+                        <span class="clinical-label">Clinical Summary: <br><br></span>
 
                         {% if prescription.clinical_record %}
-                            {{ prescription.clinical_record|linebreaksbr }}
+                        {{ prescription.clinical_record|linebreaksbr }}
                         {% endif %}
                     </div>
 
@@ -859,10 +866,12 @@
                             <div class="vital-row"><span class="label">Pulse:</span> {{ prescription.pulse }}</div>
                             {% endif %}
                             {% if prescription.spo2 %}
-                            <div class="vital-row"><span class="label">SPO<sub>2</sub>:</span> {{ prescription.spo2 }}</div>
+                            <div class="vital-row"><span class="label">SPO<sub>2</sub>:</span> {{ prescription.spo2 }}
+                            </div>
                             {% endif %}
                             {% if prescription.blood_pressure %}
-                            <div class="vital-row"><span class="label">BP:</span> {{ prescription.blood_pressure }}</div>
+                            <div class="vital-row"><span class="label">BP:</span> {{ prescription.blood_pressure }}
+                            </div>
                             {% endif %}
                             {% if prescription.sugar %}
                             <div class="vital-row"><span class="label">Sugar:</span> {{ prescription.sugar }}</div>
@@ -871,7 +880,8 @@
                             <div class="vital-row"><span class="label">Temp:</span> {{ prescription.temperature }}</div>
                             {% endif %}
                             {% if prescription.respiratory_rate %}
-                            <div class="vital-row"><span class="label">RR:</span> {{ prescription.respiratory_rate }}</div>
+                            <div class="vital-row"><span class="label">RR:</span> {{ prescription.respiratory_rate }}
+                            </div>
                             {% endif %}
                             {% if prescription.chest_notes %}
                             <div class="vital-row chest-row">
@@ -891,10 +901,12 @@
 
                 <div class="right-col">
                     {% if prescription.is_admitted and prescription.ipd_prescription %}
-                    <div style="font-size: 14pt; font-weight: bold; margin-bottom: 2mm; border-bottom: 2px solid #000; display: inline-block;">
+                    <div
+                        style="font-size: 14pt; font-weight: bold; margin-bottom: 2mm; border-bottom: 2px solid #000; display: inline-block;">
                         IPD Prescription
                     </div>
-                    <div style="white-space: pre-line; margin-bottom: 6mm; font-size: 12pt; line-height: 1.4;">{{ prescription.ipd_prescription }}</div>
+                    <div style="white-space: pre-line; margin-bottom: 6mm; font-size: 12pt; line-height: 1.4;">{{
+                        prescription.ipd_prescription }}</div>
                     {% endif %}
 
                     {% if prescription.medicines.exists %}
@@ -917,25 +929,29 @@
                             {% if med.medicine or med.custom_medicine %}
                             <tr>
                                 <td>{{ med.get_medicine_name }}{% if med.dosage %} {{ med.dosage }}{% endif %}</td>
-                                <td class="time-cell">{% if med.morning %}{{ med.morning_display|default:med.morning }}{% else %}-{% endif %}</td>
-                                <td class="time-cell">{% if med.afternoon %}{{ med.afternoon_display|default:med.afternoon }}{% else %}-{% endif %}</td>
-                                <td class="time-cell">{% if med.evening %}{{ med.evening_display|default:med.evening }}{% else %}-{% endif %}</td>
-                                <td class="time-cell">{% if med.night %}{{ med.night_display|default:med.night }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.morning %}{{ med.morning_display|default:med.morning
+                                    }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.afternoon %}{{
+                                    med.afternoon_display|default:med.afternoon }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.evening %}{{ med.evening_display|default:med.evening
+                                    }}{% else %}-{% endif %}</td>
+                                <td class="time-cell">{% if med.night %}{{ med.night_display|default:med.night }}{% else
+                                    %}-{% endif %}</td>
                                 <td class="duration-cell">
                                     {% if med.duration_choice == '1week' %}
-                                        <span class="urdu-font">1 ہفتہ</span>
+                                    <span class="urdu-font">1 ہفتہ</span>
                                     {% elif med.duration_choice == '2weeks' %}
-                                        <span class="urdu-font">2 ہفتے</span>
+                                    <span class="urdu-font">2 ہفتے</span>
                                     {% elif med.duration_choice == '1month' %}
-                                        <span class="urdu-font">1 ماہ</span>
+                                    <span class="urdu-font">1 ماہ</span>
                                     {% elif med.duration_choice == '2months' %}
-                                        <span class="urdu-font">2 ماہ</span>
+                                    <span class="urdu-font">2 ماہ</span>
                                     {% elif med.duration_choice == 'custom' and med.custom_duration %}
-                                        <span class="urdu-font">{{ med.custom_duration }}</span>
+                                    <span class="urdu-font">{{ med.custom_duration }}</span>
                                     {% elif med.days %}
-                                        <span class="urdu-font">{{ med.days }} دن</span>
+                                    <span class="urdu-font">{{ med.days }} دن</span>
                                     {% else %}
-                                        -
+                                    -
                                     {% endif %}
                                 </td>
                                 <td class="instructions-cell">{{ med.get_instruction_html|safe }}</td>
@@ -951,7 +967,7 @@
                     <div class="rx-title">℞</div>
                     {% endif %}
                     <div class="vaccine-print-line">
-                        2026/2027 Influvac /vaxigrip ...I/M once only
+                        2026/2027 Flu Vaccine ...I/M once only
                     </div>
                     {% endif %}
                 </div>
@@ -981,7 +997,9 @@
                             {% if prescription.other_instructions %}
                             <li>{{ prescription.other_instructions }}</li>
                             {% endif %}
-                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and not prescription.instruction_weight_reduction and not prescription.other_instructions %}
+                            {% if not prescription.instruction_avoid_food and not prescription.instruction_no_smoking
+                            and not prescription.instruction_gargles and not prescription.instruction_warm_liquids and
+                            not prescription.instruction_weight_reduction and not prescription.other_instructions %}
                             <li>&nbsp;</li>
                             {% endif %}
                         </ol>
@@ -1004,7 +1022,8 @@
             </div>
             <div class="follow-up-footer">
                 <div class="follow-up-left">
-                    <div><span class="title">Follow up:</span> {{ prescription.follow_up|default:"Visit after 1 month" }}</div>
+                    <div><span class="title">Follow up:</span> {{ prescription.follow_up|default:"Visit after 1 month"
+                        }}</div>
                     {% if prescription.rescue_rx_given %}
                     <div class="rescue-note">Dose of Rescue Rx given with IV Steroid and Nebulization</div>
                     {% endif %}
@@ -1016,7 +1035,10 @@
                     pattern may change in hours by nature. In case of emergency, <br>Visit nearby hospital.
                 </div>
                 <div class="whatsapp-info">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#000000" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                        <path fill="#000000"
+                            d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z" />
+                    </svg>
                     <span>0318 - 5420060</span>
                 </div>
             </div>
