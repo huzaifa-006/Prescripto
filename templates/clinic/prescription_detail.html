@@ -199,12 +199,12 @@
                         <td class="medicine-name">{{ med.get_medicine_name }}</td>
                         <td>{{ med.dosage|default:"-" }}</td>
                         <td class="timing-cells">
-                            <span class="{% if med.morning %}checked{% endif %}">{% if med.morning %}{{ med.morning_display|default:med.morning }}{% else %}-{% endif %}</span>
-                            <span class="{% if med.afternoon %}checked{% endif %}">{% if med.afternoon %}{{ med.afternoon_display|default:med.afternoon }}{% else %}-{% endif %}</span>
-                            <span class="{% if med.evening %}checked{% endif %}">{% if med.evening %}{{ med.evening_display|default:med.evening }}{% else %}-{% endif %}</span>
-                            <span class="{% if med.night %}checked{% endif %}">{% if med.night %}{{ med.night_display|default:med.night }}{% else %}-{% endif %}</span>
+                            <span class="{% if med.morning_display %}checked{% endif %}">{{ med.morning_display }}</span>
+                            <span class="{% if med.afternoon_display %}checked{% endif %}">{{ med.afternoon_display }}</span>
+                            <span class="{% if med.evening_display %}checked{% endif %}">{{ med.evening_display }}</span>
+                            <span class="{% if med.night_display %}checked{% endif %}">{{ med.night_display }}</span>
                         </td>
-                        <td>{{ med.days }} day(s)</td>
+                        <td>{% if med.duration_choice == '1week' %}1 Week{% elif med.duration_choice == '2weeks' %}2 Weeks{% elif med.duration_choice == '1month' %}1 Month{% elif med.duration_choice == '2months' %}2 Months{% elif med.duration_choice == 'custom' and med.custom_duration %}{{ med.custom_duration }}{% elif med.days and med.days > 0 %}{{ med.days }} day(s){% endif %}</td>
                         <td>{{ med.get_instruction_display_text }}</td>
                     </tr>
                     {% endif %}

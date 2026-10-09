@@ -88,6 +88,18 @@ class PrescriptionForm(forms.ModelForm):
             'follow_up': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Follow-up date/notes'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].required = False
+
+    def clean_date(self):
+        date = self.cleaned_data.get('date')
+        if not date:
+            from .models import get_current_local_date
+            return get_current_local_date()
+        return date
+
 
 def normalize_dose(value):
     if value is None or value == '':
@@ -200,6 +212,11 @@ class PrescriptionMedicineForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control timing-select'}),
     )
 
+    days = forms.IntegerField(
+        required=False,
+        widget=forms.NumberInput(attrs={'class': 'form-control days-input', 'style': 'width: 70px;'}),
+    )
+
     class Meta:
         model = PrescriptionMedicine
         fields = ['medicine', 'custom_medicine', 'dosage', 'morning', 'afternoon', 'evening', 'night', 'days', 'duration_choice', 'custom_duration', 'instructions']
@@ -207,7 +224,7 @@ class PrescriptionMedicineForm(forms.ModelForm):
             'medicine': forms.Select(attrs={'class': 'form-control medicine-select'}),
             'custom_medicine': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Or type medicine name here'}),
             'dosage': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dosage'}),
-            'days': forms.NumberInput(attrs={'class': 'form-control days-input', 'min': 1, 'style': 'width: 70px;'}),
+            'days': forms.NumberInput(attrs={'class': 'form-control days-input', 'style': 'width: 70px;'}),
             'duration_choice': forms.Select(attrs={'class': 'form-control duration-select', 'style': 'width: 100%;'}),
             'custom_duration': forms.TextInput(attrs={'class': 'form-control custom-duration-input', 'placeholder': 'Custom duration', 'style': 'width: 100%; display: none;'}),
             'instructions': forms.HiddenInput(),
@@ -215,6 +232,9 @@ class PrescriptionMedicineForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if not self.instance or not self.instance.pk:
+            self.fields['days'].initial = None
 
         existing_duration_choice = self.initial.get('duration_choice') or (self.instance.duration_choice if self.instance and self.instance.pk else '')
         if existing_duration_choice == 'custom':
@@ -281,6 +301,9 @@ class PrescriptionMedicineForm(forms.ModelForm):
             cleaned_data['instructions'] = selected_instruction
         else:
             cleaned_data['instructions'] = ''
+
+        if not cleaned_data.get('days'):
+            cleaned_data['days'] = None
 
         return cleaned_data
 

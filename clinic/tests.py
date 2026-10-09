@@ -62,6 +62,47 @@ class PrescriptionPrintViewTests(TestCase):
         self.assertContains(detail_response, "0.5")
         self.assertContains(detail_response, "1.5")
 
+    def test_prescription_print_empty_when_no_dosage_or_duration(self):
+        PrescriptionMedicine.objects.create(
+            prescription=self.prescription,
+            custom_medicine="Tab ALP 0.5mg",
+        )
+        response = self.client.get(
+            reverse("prescription_print", kwargs={"pk": self.prescription.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode("utf-8")
+        self.assertIn("Tab ALP 0.5mg", content)
+        self.assertNotIn("1 دن", content)
+        self.assertNotIn("{{", content)
+        self.assertIn('<td class="time-cell"></td>', content)
+
+    def test_prescription_create_with_no_duration_or_timing_saves_successfully(self):
+        post_data = {
+            "date": "",
+            "medicines-TOTAL_FORMS": "1",
+            "medicines-INITIAL_FORMS": "0",
+            "medicines-MIN_NUM_FORMS": "0",
+            "medicines-MAX_NUM_FORMS": "1000",
+            "medicines-0-custom_medicine": "Tab ALP 0.5mg",
+            "medicines-0-morning": "0.5",
+            "medicines-0-afternoon": "0",
+            "medicines-0-evening": "0",
+            "medicines-0-night": "0",
+            "medicines-0-days": "",
+            "medicines-0-duration_choice": "",
+        }
+        response = self.client.post(
+            reverse("prescription_create", kwargs={"patient_id": self.patient.pk}),
+            data=post_data,
+        )
+        new_prescription = Prescription.objects.filter(patient=self.patient).exclude(pk=self.prescription.pk).first()
+        self.assertIsNotNone(new_prescription)
+        self.assertRedirects(response, reverse("prescription_print", kwargs={"pk": new_prescription.pk}))
+        med = new_prescription.medicines.first()
+        self.assertEqual(med.get_medicine_name(), "Tab ALP 0.5mg")
+        self.assertIsNone(med.days)
+
     def test_prescription_print_shows_custom_vitals_only_when_filled(self):
         self.prescription.blood_pressure = "120/80"
         self.prescription.sugar = "140 mg/dL"
@@ -107,7 +148,7 @@ class PrescriptionPrintViewTests(TestCase):
             reverse("prescription_print", kwargs={"pk": self.prescription.pk})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "2026/2027 Influvac /vaxigrip ...I/M once only")
+        self.assertContains(response, "2026/2027 Flu Vaccine ...I/M once only")
 
     def test_prescription_print_hides_vaccine_line_when_not_checked(self):
         self.prescription.influvac_vaccine = False
@@ -117,7 +158,37 @@ class PrescriptionPrintViewTests(TestCase):
             reverse("prescription_print", kwargs={"pk": self.prescription.pk})
         )
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "2026/2027 Influvac /vaxigrip ...I/M once only")
+        self.assertNotContains(response, "2026/2027 Flu Vaccine ...I/M once only")
+
+    def test_prescription_create_redirects_to_print(self):
+        post_data = {
+            "date": "2026-10-09",
+            "medicines-TOTAL_FORMS": "0",
+            "medicines-INITIAL_FORMS": "0",
+            "medicines-MIN_NUM_FORMS": "0",
+            "medicines-MAX_NUM_FORMS": "1000",
+        }
+        response = self.client.post(
+            reverse("prescription_create", kwargs={"patient_id": self.patient.pk}),
+            data=post_data,
+        )
+        new_prescription = Prescription.objects.filter(patient=self.patient).exclude(pk=self.prescription.pk).first()
+        self.assertIsNotNone(new_prescription)
+        self.assertRedirects(response, reverse("prescription_print", kwargs={"pk": new_prescription.pk}))
+
+    def test_prescription_edit_redirects_to_print(self):
+        post_data = {
+            "date": "2026-10-09",
+            "medicines-TOTAL_FORMS": "0",
+            "medicines-INITIAL_FORMS": "0",
+            "medicines-MIN_NUM_FORMS": "0",
+            "medicines-MAX_NUM_FORMS": "1000",
+        }
+        response = self.client.post(
+            reverse("prescription_edit", kwargs={"pk": self.prescription.pk}),
+            data=post_data,
+        )
+        self.assertRedirects(response, reverse("prescription_print", kwargs={"pk": self.prescription.pk}))
 
 
 class MedicineFormChoicesTests(TestCase):

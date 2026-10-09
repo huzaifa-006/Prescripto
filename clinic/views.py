@@ -678,14 +678,14 @@ def prescription_create(request, patient_id):
                 formset.save()
                 
                 messages.success(request, 'Prescription created successfully.')
-                return redirect('prescription_detail', pk=prescription.pk)
+                return redirect('prescription_print', pk=prescription.pk)
             except Exception as e:
                 messages.error(request, f'Error saving medicines: {str(e)}')
                 # Delete the prescription if medicine saving failed
                 prescription.delete()
         else:
             # Form or formset has errors - don't save anything
-            formset = PrescriptionMedicineFormSet(request.POST)
+            messages.error(request, 'Please check the form for errors.')
     else:
         # Set default date to today
         initial = {'date': timezone.now().date()}
@@ -743,7 +743,9 @@ def prescription_edit(request, pk):
             form.save()
             formset.save()
             messages.success(request, 'Prescription updated successfully.')
-            return redirect('prescription_detail', pk=prescription.pk)
+            return redirect('prescription_print', pk=prescription.pk)
+        else:
+            messages.error(request, 'Please check the form for errors.')
     else:
         form = PrescriptionForm(instance=prescription)
         formset = PrescriptionMedicineEditFormSet(instance=prescription)

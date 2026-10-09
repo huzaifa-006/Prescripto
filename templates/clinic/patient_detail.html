@@ -73,8 +73,7 @@
                             {% endif %}
                             Prescription
                         </h4>
-                        <p class="clinical-notes">{{ prescription.clinical_record|truncatewords:15|default:"No clinical
-                            notes" }}</p>
+                        <p class="clinical-notes">{{ prescription.clinical_record|truncatewords:15|default:"No clinical notes" }}</p>
                         <p class="medicines-count">
                             <i class="fas fa-pills"></i> {{ prescription.medicines.count }} medicine(s) prescribed
                         </p>

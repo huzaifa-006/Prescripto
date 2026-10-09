@@ -91,7 +91,10 @@ class Medicine(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        display = f"{self.form} {self.name}"
+        if self.name.lower().startswith(self.form.lower() + " "):
+            display = self.name
+        else:
+            display = f"{self.form} {self.name}"
         if self.strength:
             display += f" {self.strength}"
         return display
@@ -128,7 +131,7 @@ class Prescription(models.Model):
     """Prescription record for a patient"""
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='prescriptions')
     doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, blank=True, related_name='prescriptions')
-    date = models.DateField(default=get_current_local_date)
+    date = models.DateField(default=get_current_local_date, blank=True, null=True)
     time = models.TimeField(default=get_current_local_time, blank=True, null=True)
     
     # Clinical information
@@ -225,7 +228,7 @@ class PrescriptionMedicine(models.Model):
     night = models.DecimalField(max_digits=3, decimal_places=1, default=0, help_text="Number of tablets/dose at night")
     
     # Duration
-    days = models.PositiveIntegerField(default=1, help_text="Number of days")
+    days = models.PositiveIntegerField(null=True, blank=True, default=None, help_text="Number of days")
     
     # Duration presets
     DURATION_CHOICES = [
@@ -295,7 +298,7 @@ class PrescriptionMedicine(models.Model):
     def get_instruction_display_text(self):
         instruction = (self.instructions or "").strip()
         if not instruction:
-            return "-"
+            return ""
 
         return self.INSTRUCTION_TRANSLATIONS.get(instruction.lower(), instruction)
 
@@ -305,7 +308,7 @@ class PrescriptionMedicine(models.Model):
         from django.utils.html import escape
         instruction = (self.instructions or "").strip()
         if not instruction:
-            return "-"
+            return ""
 
         # Check if it matches an English key (legacy data) - translate to Urdu
         translated = self.INSTRUCTION_TRANSLATIONS.get(instruction.lower())
